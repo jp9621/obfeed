@@ -78,6 +78,7 @@
     "python.analysis.extraPaths": [
     // adjust if your workspace root **is** hft_sim, drop the hft_sim/ prefix:
     "${workspaceFolder}/hft_sim/build/Release"
-  ]
+  ],
+  "cmake.ignoreCMakeListsMissing": true
     
 }
