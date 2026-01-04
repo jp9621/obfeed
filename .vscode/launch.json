@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Run Test Engine",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+
+      // 1️⃣ set cwd to the Release folder
+      "cwd": "${workspaceFolder}/hft_sim/build/Release",
+
+      // 2️⃣ also set PYTHONPATH just in case
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/hft_sim/build/Release"
+      }
+    }
+  ]
+}

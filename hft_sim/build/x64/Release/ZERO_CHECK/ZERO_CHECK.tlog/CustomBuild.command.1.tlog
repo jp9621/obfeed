@@ -1,0 +1,10 @@
+^C:\USERS\WEOWO\ONEDRIVE\DESKTOP\PYWORK\HFT-ENGINE\HFT_SIM\BUILD\CMAKEFILES\B0AD86CB8B0B8CD55B983F29F20EEBB7\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim -BC:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/hft_sim.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

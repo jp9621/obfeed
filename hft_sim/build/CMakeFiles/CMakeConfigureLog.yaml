@@ -1,0 +1,430 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      The system is: Windows - 10.0.22631 - AMD64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      MSBuild version 17.13.19+0d9f5a35a for .NET Framework
+      Build started 5/19/2025 1:39:46 AM.
+      
+      Project "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\4.0.0\\CompilerIdCXX\\CompilerIdCXX.vcxproj" on node 1 (default targets).
+      PrepareForBuild:
+        Creating directory "Debug\\".
+        Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+        Creating directory "Debug\\CompilerIdCXX.tlog\\".
+      InitializeBuildStatus:
+        Creating "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+        Touching "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
+      VcpkgTripletSelection:
+        Using triplet "x64-windows" from "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\"
+        Using normalized configuration "Release"
+      ClCompile:
+        C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\include" /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TP /FC /errorReport:queue CMakeCXXCompilerId.cpp
+        CMakeCXXCompilerId.cpp
+      Link:
+        C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\lib" /LIBPATH:"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdCXX.lib" /MACHINE:X64 Debug\\CMakeCXXCompilerId.obj
+        CompilerIdCXX.vcxproj -> C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\4.0.0\\CompilerIdCXX\\CompilerIdCXX.exe
+      AppLocalFromInstalled:
+        pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\Users\\weowo\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\4.0.0\\CompilerIdCXX\\CompilerIdCXX.exe" "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.write.1u.tlog" "Debug\\vcpkg.applocal.log"
+        'pwsh.exe' is not recognized as an internal or external command,
+        operable program or batch file.
+        The command "pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\Users\\weowo\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\4.0.0\\CompilerIdCXX\\CompilerIdCXX.exe" "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.write.1u.tlog" "Debug\\vcpkg.applocal.log"" exited with code 9009.
+        "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "C:\\Users\\weowo\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\4.0.0\\CompilerIdCXX\\CompilerIdCXX.exe" "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.write.1u.tlog" "Debug\\vcpkg.applocal.log"
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_CXX_COMPILER=C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.43.34808\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        Deleting file "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
+        Touching "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.lastbuildstate".
+      Done Building Project "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\4.0.0\\CompilerIdCXX\\CompilerIdCXX.vcxproj" (default targets).
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:01.27
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
+      
+      The CXX compiler identification is MSVC, found in:
+        C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/4.0.0/CompilerIdCXX/CompilerIdCXX.exe
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-7vkw1a"
+      binary: "C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-7vkw1a"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /GR /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-7vkw1a'
+        
+        Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_dbe6f.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.13.19+0d9f5a35a for .NET Framework
+        Build started 5/19/2025 1:39:48 AM.
+        
+        Project "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7vkw1a\\cmTC_dbe6f.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_dbe6f.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7vkw1a\\Debug\\".
+          Creating directory "cmTC_dbe6f.dir\\Debug\\cmTC_dbe6f.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_dbe6f.dir\\Debug\\cmTC_dbe6f.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_dbe6f.dir\\Debug\\cmTC_dbe6f.tlog\\unsuccessfulbuild".
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_dbe6f.dir\\Debug\\\\" /Fd"cmTC_dbe6f.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.43.34809 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /I"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_dbe6f.dir\\Debug\\\\" /Fd"cmTC_dbe6f.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
+          CMakeCXXCompilerABI.cpp
+        Link:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7vkw1a\\Debug\\cmTC_dbe6f.exe" /INCREMENTAL /ILK:"cmTC_dbe6f.dir\\Debug\\cmTC_dbe6f.ilk" /NOLOGO /LIBPATH:"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-7vkw1a/Debug/cmTC_dbe6f.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-7vkw1a/Debug/cmTC_dbe6f.lib" /MACHINE:X64  /machine:x64 cmTC_dbe6f.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_dbe6f.vcxproj -> C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7vkw1a\\Debug\\cmTC_dbe6f.exe
+        AppLocalFromInstalled:
+          pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\Users\\weowo\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7vkw1a\\Debug\\cmTC_dbe6f.exe" "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_dbe6f.dir\\Debug\\cmTC_dbe6f.tlog\\cmTC_dbe6f.write.1u.tlog" "cmTC_dbe6f.dir\\Debug\\vcpkg.applocal.log"
+          'pwsh.exe' is not recognized as an internal or external command,
+          operable program or batch file.
+          The command "pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\Users\\weowo\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7vkw1a\\Debug\\cmTC_dbe6f.exe" "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_dbe6f.dir\\Debug\\cmTC_dbe6f.tlog\\cmTC_dbe6f.write.1u.tlog" "cmTC_dbe6f.dir\\Debug\\vcpkg.applocal.log"" exited with code 9009.
+          "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "C:\\Users\\weowo\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7vkw1a\\Debug\\cmTC_dbe6f.exe" "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_dbe6f.dir\\Debug\\cmTC_dbe6f.tlog\\cmTC_dbe6f.write.1u.tlog" "cmTC_dbe6f.dir\\Debug\\vcpkg.applocal.log"
+        FinalizeBuildStatus:
+          Deleting file "cmTC_dbe6f.dir\\Debug\\cmTC_dbe6f.tlog\\unsuccessfulbuild".
+          Touching "cmTC_dbe6f.dir\\Debug\\cmTC_dbe6f.tlog\\cmTC_dbe6f.lastbuildstate".
+        Done Building Project "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-7vkw1a\\cmTC_dbe6f.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.74
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:227 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'CXX': C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.43.34808/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CMakeDetermineLinkerId.cmake:36 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:264 (cmake_determine_linker_id)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Running the CXX compiler's linker: "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.43.34808/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.43.34809.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CheckSourceCompiles.cmake:104 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckCXXCompilerFlag.cmake:55 (cmake_check_compiler_flag)"
+      - "build/_deps/pybind11-src/tools/pybind11Common.cmake:276 (check_cxx_compiler_flag)"
+      - "build/_deps/pybind11-src/tools/pybind11Common.cmake:340 (_pybind11_return_if_cxx_and_linker_flags_work)"
+      - "build/_deps/pybind11-src/tools/pybind11Common.cmake:385 (_pybind11_generate_lto)"
+      - "build/_deps/pybind11-src/CMakeLists.txt:210 (include)"
+    checks:
+      - "Performing Test HAS_MSVC_GL_LTCG"
+    directories:
+      source: "C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-kpos4g"
+      binary: "C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-kpos4g"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /GR /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_POSITION_INDEPENDENT_CODE: "ON"
+    buildResult:
+      variable: "HAS_MSVC_GL_LTCG"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-kpos4g'
+        
+        Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_f72bc.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.13.19+0d9f5a35a for .NET Framework
+        Build started 5/19/2025 1:39:56 AM.
+        
+        Project "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-kpos4g\\cmTC_f72bc.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_f72bc.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-kpos4g\\Debug\\".
+          Creating directory "cmTC_f72bc.dir\\Debug\\cmTC_f72bc.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_f72bc.dir\\Debug\\cmTC_f72bc.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_f72bc.dir\\Debug\\cmTC_f72bc.tlog\\unsuccessfulbuild".
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /GL /D _MBCS /D WIN32 /D _WINDOWS /D HAS_MSVC_GL_LTCG /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /std:c++17 /Fo"cmTC_f72bc.dir\\Debug\\\\" /Fd"cmTC_f72bc.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-kpos4g\\src.cxx"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.43.34809 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /I"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /GL /D _MBCS /D WIN32 /D _WINDOWS /D HAS_MSVC_GL_LTCG /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /std:c++17 /Fo"cmTC_f72bc.dir\\Debug\\\\" /Fd"cmTC_f72bc.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-kpos4g\\src.cxx"
+          src.cxx
+        Link:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-kpos4g\\Debug\\cmTC_f72bc.exe" /INCREMENTAL /ILK:"cmTC_f72bc.dir\\Debug\\cmTC_f72bc.ilk" /NOLOGO /LIBPATH:"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" "-LTCG" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-kpos4g/Debug/cmTC_f72bc.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-kpos4g/Debug/cmTC_f72bc.lib" /MACHINE:X64  /machine:x64 cmTC_f72bc.dir\\Debug\\src.obj
+        LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/LTCG' specification [C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-kpos4g\\cmTC_f72bc.vcxproj]
+          Generating code
+          Finished generating code
+          cmTC_f72bc.vcxproj -> C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-kpos4g\\Debug\\cmTC_f72bc.exe
+        AppLocalFromInstalled:
+          pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\Users\\weowo\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-kpos4g\\Debug\\cmTC_f72bc.exe" "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_f72bc.dir\\Debug\\cmTC_f72bc.tlog\\cmTC_f72bc.write.1u.tlog" "cmTC_f72bc.dir\\Debug\\vcpkg.applocal.log"
+          'pwsh.exe' is not recognized as an internal or external command,
+          operable program or batch file.
+          The command "pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\Users\\weowo\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-kpos4g\\Debug\\cmTC_f72bc.exe" "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_f72bc.dir\\Debug\\cmTC_f72bc.tlog\\cmTC_f72bc.write.1u.tlog" "cmTC_f72bc.dir\\Debug\\vcpkg.applocal.log"" exited with code 9009.
+          "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "C:\\Users\\weowo\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-kpos4g\\Debug\\cmTC_f72bc.exe" "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_f72bc.dir\\Debug\\cmTC_f72bc.tlog\\cmTC_f72bc.write.1u.tlog" "cmTC_f72bc.dir\\Debug\\vcpkg.applocal.log"
+        FinalizeBuildStatus:
+          Deleting file "cmTC_f72bc.dir\\Debug\\cmTC_f72bc.tlog\\unsuccessfulbuild".
+          Touching "cmTC_f72bc.dir\\Debug\\cmTC_f72bc.tlog\\cmTC_f72bc.lastbuildstate".
+        Done Building Project "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-kpos4g\\cmTC_f72bc.vcxproj" (default targets).
+        
+        Build succeeded.
+        
+        "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-kpos4g\\cmTC_f72bc.vcxproj" (default target) (1) ->
+        (Link target) -> 
+          LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/LTCG' specification [C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-kpos4g\\cmTC_f72bc.vcxproj]
+        
+            1 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.89
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CheckSourceCompiles.cmake:104 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckCXXSourceCompiles.cmake:58 (cmake_check_source_compiles)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/FindThreads.cmake:99 (check_cxx_source_compiles)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/FindThreads.cmake:163 (_threads_check_libc)"
+      - "CMakeLists.txt:34 (find_package)"
+    checks:
+      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
+    directories:
+      source: "C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-s7fz0l"
+      binary: "C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-s7fz0l"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /GR /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_POSITION_INDEPENDENT_CODE: "ON"
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-s7fz0l'
+        
+        Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_cafcb.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.13.19+0d9f5a35a for .NET Framework
+        Build started 5/19/2025 1:39:58 AM.
+        
+        Project "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-s7fz0l\\cmTC_cafcb.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_cafcb.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-s7fz0l\\Debug\\".
+          Creating directory "cmTC_cafcb.dir\\Debug\\cmTC_cafcb.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_cafcb.dir\\Debug\\cmTC_cafcb.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_cafcb.dir\\Debug\\cmTC_cafcb.tlog\\unsuccessfulbuild".
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /std:c++17 /Fo"cmTC_cafcb.dir\\Debug\\\\" /Fd"cmTC_cafcb.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-s7fz0l\\src.cxx"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.43.34809 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /I"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /std:c++17 /Fo"cmTC_cafcb.dir\\Debug\\\\" /Fd"cmTC_cafcb.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-s7fz0l\\src.cxx"
+          src.cxx
+        C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-s7fz0l\\src.cxx(1,10): error C1083: Cannot open include file: 'pthread.h': No such file or directory [C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-s7fz0l\\cmTC_cafcb.vcxproj]
+        Done Building Project "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-s7fz0l\\cmTC_cafcb.vcxproj" (default targets) -- FAILED.
+        
+        Build FAILED.
+        
+        "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-s7fz0l\\cmTC_cafcb.vcxproj" (default target) (1) ->
+        (ClCompile target) -> 
+          C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-s7fz0l\\src.cxx(1,10): error C1083: Cannot open include file: 'pthread.h': No such file or directory [C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-s7fz0l\\cmTC_cafcb.vcxproj]
+        
+            0 Warning(s)
+            1 Error(s)
+        
+        Time Elapsed 00:00:00.29
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckLibraryExists.cmake:112 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/FindThreads.cmake:112 (check_library_exists)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/FindThreads.cmake:175 (_threads_check_lib)"
+      - "CMakeLists.txt:34 (find_package)"
+    checks:
+      - "Looking for pthread_create in pthreads"
+    directories:
+      source: "C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-g9oowp"
+      binary: "C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-g9oowp"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /GR /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_POSITION_INDEPENDENT_CODE: "ON"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREADS_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-g9oowp'
+        
+        Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_ee7f7.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.13.19+0d9f5a35a for .NET Framework
+        Build started 5/19/2025 1:39:58 AM.
+        
+        Project "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g9oowp\\cmTC_ee7f7.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_ee7f7.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g9oowp\\Debug\\".
+          Creating directory "cmTC_ee7f7.dir\\Debug\\cmTC_ee7f7.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_ee7f7.dir\\Debug\\cmTC_ee7f7.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_ee7f7.dir\\Debug\\cmTC_ee7f7.tlog\\unsuccessfulbuild".
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /std:c++17 /Fo"cmTC_ee7f7.dir\\Debug\\\\" /Fd"cmTC_ee7f7.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g9oowp\\CheckFunctionExists.cxx"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.43.34809 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /I"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /std:c++17 /Fo"cmTC_ee7f7.dir\\Debug\\\\" /Fd"cmTC_ee7f7.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g9oowp\\CheckFunctionExists.cxx"
+          CheckFunctionExists.cxx
+        Link:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g9oowp\\Debug\\cmTC_ee7f7.exe" /INCREMENTAL /ILK:"cmTC_ee7f7.dir\\Debug\\cmTC_ee7f7.ilk" /NOLOGO /LIBPATH:"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" pthreads.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-g9oowp/Debug/cmTC_ee7f7.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-g9oowp/Debug/cmTC_ee7f7.lib" /MACHINE:X64  /machine:x64 cmTC_ee7f7.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: cannot open file 'pthreads.lib' [C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g9oowp\\cmTC_ee7f7.vcxproj]
+        Done Building Project "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g9oowp\\cmTC_ee7f7.vcxproj" (default targets) -- FAILED.
+        
+        Build FAILED.
+        
+        "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g9oowp\\cmTC_ee7f7.vcxproj" (default target) (1) ->
+        (Link target) -> 
+          LINK : fatal error LNK1104: cannot open file 'pthreads.lib' [C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g9oowp\\cmTC_ee7f7.vcxproj]
+        
+            0 Warning(s)
+            1 Error(s)
+        
+        Time Elapsed 00:00:00.33
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckLibraryExists.cmake:112 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/FindThreads.cmake:112 (check_library_exists)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/FindThreads.cmake:176 (_threads_check_lib)"
+      - "CMakeLists.txt:34 (find_package)"
+    checks:
+      - "Looking for pthread_create in pthread"
+    directories:
+      source: "C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-ehdp53"
+      binary: "C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-ehdp53"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /GR /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_POSITION_INDEPENDENT_CODE: "ON"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREAD_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-ehdp53'
+        
+        Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_87fff.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.13.19+0d9f5a35a for .NET Framework
+        Build started 5/19/2025 1:39:59 AM.
+        
+        Project "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ehdp53\\cmTC_87fff.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_87fff.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ehdp53\\Debug\\".
+          Creating directory "cmTC_87fff.dir\\Debug\\cmTC_87fff.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_87fff.dir\\Debug\\cmTC_87fff.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_87fff.dir\\Debug\\cmTC_87fff.tlog\\unsuccessfulbuild".
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /std:c++17 /Fo"cmTC_87fff.dir\\Debug\\\\" /Fd"cmTC_87fff.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ehdp53\\CheckFunctionExists.cxx"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.43.34809 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /I"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\include" /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /std:c++17 /Fo"cmTC_87fff.dir\\Debug\\\\" /Fd"cmTC_87fff.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ehdp53\\CheckFunctionExists.cxx"
+          CheckFunctionExists.cxx
+        Link:
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ehdp53\\Debug\\cmTC_87fff.exe" /INCREMENTAL /ILK:"cmTC_87fff.dir\\Debug\\cmTC_87fff.ilk" /NOLOGO /LIBPATH:"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" pthread.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\\Users\\weowo\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-ehdp53/Debug/cmTC_87fff.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/CMakeFiles/CMakeScratch/TryCompile-ehdp53/Debug/cmTC_87fff.lib" /MACHINE:X64  /machine:x64 cmTC_87fff.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: cannot open file 'pthread.lib' [C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ehdp53\\cmTC_87fff.vcxproj]
+        Done Building Project "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ehdp53\\cmTC_87fff.vcxproj" (default targets) -- FAILED.
+        
+        Build FAILED.
+        
+        "C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ehdp53\\cmTC_87fff.vcxproj" (default target) (1) ->
+        (Link target) -> 
+          LINK : fatal error LNK1104: cannot open file 'pthread.lib' [C:\\Users\\weowo\\OneDrive\\Desktop\\pywork\\hft-engine\\hft_sim\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ehdp53\\cmTC_87fff.vcxproj]
+        
+            0 Warning(s)
+            1 Error(s)
+        
+        Time Elapsed 00:00:00.36
+        
+      exitCode: 1
+...
