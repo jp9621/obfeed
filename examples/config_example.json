@@ -1,0 +1,35 @@
+{
+  "symbol": "SPY",
+  "venue": "SIM",
+  "initial_price": 450.0,
+  "rng_seed": 42,
+  "wall_clock_sleep": 0.01,
+  "market": {
+    "mu": 0.0,
+    "sigma": 3.5e-5,
+    "jump_intensity": 2e-7,
+    "jump_mu": 0.0,
+    "jump_sigma": 0.02,
+    "dt": 1.0,
+    "trade_intensity": 1.0,
+    "tick_size": 0.01,
+    "typical_trade_qty": 100,
+    "quoted_spread_bps": 5.0,
+    "option_chain": {
+      "expiries_days": [7, 14, 21, 30, 45, 60, 75, 90, 120],
+      "moneyness": [-0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
+      "risk_free_rate": 0.01,
+      "dividend_yield": 0.0,
+      "vol_ewma_halflife": 120.0,
+      "min_history_samples": 10,
+      "min_vol": 1e-4,
+      "max_vol": 1.0,
+      "smile_slope": -0.15,
+      "smile_convexity": 0.10,
+      "term_structure_slope": 0.02,
+      "term_structure_pivot_days": 30.0,
+      "vol_noise_std": 0.0,
+      "price_noise_std": 0.02
+    }
+  }
+}
