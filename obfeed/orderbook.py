@@ -4,10 +4,10 @@ from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
 
 try:
-    from hft import OrderBook, Order, OrderSide
-    HAS_HFT = True
+    from ob import OrderBook, Order, OrderSide
+    HAS_OB = True
 except ImportError:
-    HAS_HFT = False
+    HAS_OB = False
     OrderBook = None
     Order = None
     OrderSide = None
@@ -32,10 +32,10 @@ class OrderBookManager:
         Initialize orderbook manager.
         
         Args:
-            use_cpp: If True, use C++ orderbook (requires hft module). 
+            use_cpp: If True, use C++ orderbook (requires ob module). 
                      If False or C++ not available, use Python-only implementation.
         """
-        self.use_cpp = use_cpp and HAS_HFT
+        self.use_cpp = use_cpp and HAS_OB
         if self.use_cpp:
             self.orderbook = OrderBook()
         else:

@@ -1,8 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/cmake_install.cmake",
-		"C:/Users/weowo/OneDrive/Desktop/pywork/hft-engine/hft_sim/build/_deps/pybind11-build/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

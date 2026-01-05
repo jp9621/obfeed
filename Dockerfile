@@ -21,13 +21,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Build the C++ components
-RUN cd hft_sim && \
+RUN cd ob && \
     rm -rf build && \
     mkdir build && \
     cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
     cmake --build . && \
-    find . -name "hft*.so" -exec cp {} /app/ \; || \
+    find . -name "ob*.so" -exec cp {} /app/ \; || \
     (echo "Build completed, checking for .so file..." && find . -name "*.so" && cp $(find . -name "*.so" | head -1) /app/ 2>/dev/null || true)
 
 # Make port 8000 available to the world outside this container
