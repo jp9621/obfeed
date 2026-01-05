@@ -28,7 +28,7 @@
 - Examples directory with usage examples
 
 ### Changed
-- Extracted core logic from `feed.py` into modular library structure
+- Extracted core logic into modular library structure
 - Removed Kafka dependencies (now optional/pluggable)
 - Made orderbook backend optional (works with or without C++ extensions)
 
@@ -37,6 +37,5 @@
 - Prometheus metrics integration (can be added separately)
 
 ### Migration Notes
-- Old `feed.py` can still be used but new structure is recommended
 - API is now REST-based instead of direct Kafka publishing
 - Configuration is now done via API or config files instead of command-line only

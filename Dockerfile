@@ -37,4 +37,4 @@ EXPOSE 8000
 ENV PORT=8000
 
 # Run the FastAPI server
-CMD uvicorn server:app --host 0.0.0.0 --port $PORT
+CMD uvicorn obfeed.api:app --host 0.0.0.0 --port $PORT

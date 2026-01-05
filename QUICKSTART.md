@@ -144,6 +144,5 @@ for _ in range(100):
 
 ## Next Steps
 
-- Check out the [full README](README.md) for detailed documentation
 - Explore the [examples](examples/) directory
 - Visit `http://localhost:8000/docs` for interactive API documentation

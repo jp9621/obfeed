@@ -1,9 +1,14 @@
 """Setup script for OBFeed."""
 
 from setuptools import setup, find_packages
+from pathlib import Path
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+# Read README if it exists, otherwise use a default description
+readme_path = Path(__file__).parent / "README.md"
+if readme_path.exists():
+    long_description = readme_path.read_text(encoding="utf-8")
+else:
+    long_description = "Synthetic Market Feed and Orderbook Engine"
 
 setup(
     name="obfeed",
