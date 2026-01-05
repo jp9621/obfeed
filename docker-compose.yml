@@ -1,18 +1,14 @@
 version: '3.8'
 
 services:
-  obfeed:
-    build: .
+  market-feed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: market-feed
     ports:
       - "8000:8000"
     environment:
-      - PYTHONUNBUFFERED=1
-    volumes:
-      - ./:/app
-    command: obfeed server --host 0.0.0.0 --port 8000
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+      - PORT=8000
+    # Healthcheck is optional - service will be ready when port 8000 is listening
+    restart: unless-stopped

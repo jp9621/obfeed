@@ -1,0 +1,2 @@
+[console_scripts]
+obfeed = obfeed.cli:main

@@ -1,22 +1,12 @@
 from __future__ import annotations
 
-import argparse
-import json
 import math
 import random
-import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Literal, Optional
 
 import numpy as np
-from prometheus_client import start_http_server
-
-from bus.config import BusConfig
-from bus.producer import JsonProducer
-from bus.schemas import DummySchemaRegistry
-from bus.topics import OPTION_TOPIC, QUOTE_TOPIC, TRADE_TOPIC
-from bus.metrics import metrics
 
 
 Side = Literal["BUY", "SELL"]
@@ -293,70 +283,60 @@ class OptionChainGenerator:
         if base_vol is None:
             return None
 
-        with metrics.time_histogram("feed_option_chain_build_duration", engine="feed"):
-            ts_dt = datetime.fromisoformat(ts_iso)
-            chain: List[Dict[str, Any]] = []
-            n_expiries = len(self.cfg.expiries_days)
-            n_moneyness = len(self.cfg.moneyness)
+        ts_dt = datetime.fromisoformat(ts_iso)
+        chain: List[Dict[str, Any]] = []
 
-            # for each expiry
-            for days in self.cfg.expiries_days:
-                days = max(days, 1e-6)
-                ttm_years = days / 365.25
-                expiry_dt = ts_dt + timedelta(days=days)
-                expiry_iso = expiry_dt.isoformat()
+        # for each expiry
+        for days in self.cfg.expiries_days:
+            days = max(days, 1e-6)
+            ttm_years = days / 365.25
+            expiry_dt = ts_dt + timedelta(days=days)
+            expiry_iso = expiry_dt.isoformat()
 
-                # and for each moneyness
-                for m in self.cfg.moneyness:
-                    strike = max(spot * (1.0 + m), 1e-6)
-                    # calculate the local vol for this (strike, expiry)
-                    local_vol = self._local_vol(
+            # and for each moneyness
+            for m in self.cfg.moneyness:
+                strike = max(spot * (1.0 + m), 1e-6)
+                # calculate the local vol for this (strike, expiry)
+                local_vol = self._local_vol(
+                    spot=spot,
+                    strike=strike,
+                    days_to_expiry=days,
+                    base_vol=base_vol,
+                )
+
+                # and for each option type
+                for opt_type in ("CALL", "PUT"):
+                    # price the option using Black-Scholes
+                    greeks = black_scholes_greeks(
                         spot=spot,
                         strike=strike,
-                        days_to_expiry=days,
-                        base_vol=base_vol,
+                        rate=self.cfg.risk_free_rate,
+                        dividend=self.cfg.dividend_yield,
+                        vol=local_vol,
+                        ttm=ttm_years,
+                        option_type=opt_type,
                     )
 
-                    # and for each option type
-                    for opt_type in ("CALL", "PUT"):
-                        # price the option using Black-Scholes
-                        greeks = black_scholes_greeks(
-                            spot=spot,
-                            strike=strike,
-                            rate=self.cfg.risk_free_rate,
-                            dividend=self.cfg.dividend_yield,
-                            vol=local_vol,
-                            ttm=ttm_years,
-                            option_type=opt_type,
-                        )
+                    quote = {
+                        "ts": ts_iso,
+                        "expiry": expiry_iso,
+                        "time_to_expiry": ttm_years,
+                        "underlying_price": spot,
+                        "strike": strike,
+                        "option_type": opt_type,
+                        "mid_px": greeks["price"],
+                        "implied_vol": local_vol,
+                        "delta": greeks["delta"],
+                        "gamma": greeks["gamma"],
+                        "vega": greeks["vega"],
+                        "theta": greeks["theta"],
+                    }
+                    chain.append(quote)
 
-                        quote = {
-                            "ts": ts_iso,
-                            "expiry": expiry_iso,
-                            "time_to_expiry": ttm_years,
-                            "underlying_price": spot,
-                            "strike": strike,
-                            "option_type": opt_type,
-                            "mid_px": greeks["price"],
-                            "implied_vol": local_vol,
-                            "delta": greeks["delta"],
-                            "gamma": greeks["gamma"],
-                            "vega": greeks["vega"],
-                            "theta": greeks["theta"],
-                        }
-                        chain.append(quote)
+                    if self.cfg.max_chain_points is not None and len(chain) >= self.cfg.max_chain_points:
+                        return chain
 
-                        if self.cfg.max_chain_points is not None and len(chain) >= self.cfg.max_chain_points:
-                            metrics.set_gauge("feed_option_chain_expiries", n_expiries, engine="feed")
-                            metrics.set_gauge("feed_option_chain_moneyness_points", n_moneyness, engine="feed")
-                            metrics.set_gauge("feed_option_chain_total_options", len(chain), engine="feed")
-                            return chain
-
-            # Record metrics after building full chain
-            metrics.set_gauge("feed_option_chain_expiries", n_expiries, engine="feed")
-            metrics.set_gauge("feed_option_chain_moneyness_points", n_moneyness, engine="feed")
-            metrics.set_gauge("feed_option_chain_total_options", len(chain), engine="feed")
-            return chain
+        return chain
 
 
 class MarketSimulator:
@@ -420,12 +400,6 @@ class MarketSimulator:
         self.current_price = self.jump_process.step(self.current_price)
         mid = self.current_price
 
-        # Update metrics for current price and volatility
-        metrics.set_gauge("feed_underlying_price", mid, engine="feed")
-        current_vol = self.option_chain.current_vol()
-        if current_vol is not None:
-            metrics.set_gauge("feed_ewma_volatility", current_vol, engine="feed")
-
         tick = self._quote_from_price(mid)
 
         self.option_chain.update_vol(price=mid, dt=self.cfg.dt)
@@ -455,219 +429,8 @@ class MarketSimulator:
                 )
             )
 
-        # Record metrics for trades and options generated
-        metrics.inc_counter("feed_trades_generated", by=n_trades, engine="feed")
-        if options:
-            metrics.inc_counter("feed_quotes_generated", by=1, engine="feed")
-            metrics.set_gauge("feed_options_generated_per_step", len(options), engine="feed")
-        else:
-            metrics.set_gauge("feed_options_generated_per_step", 0, engine="feed")
-
-        debug = {
-            "mid": mid,
-            "n_trades": n_trades,
-            "est_vol": self.option_chain.current_vol(),
-        }
-
         return {
             "tick": tick,
             "trades": trades,
             "options": options,
-            "debug": debug,
         }
-
-
-class MarketSimFeed:
-    # runs market simular and publishes json messages to kafka
-
-    def __init__(
-        self,
-        symbol: str,
-        venue: str = "SIM",
-        wall_clock_sleep: float = 0.01,
-        rng_seed: Optional[int] = None,
-        producer: Optional[JsonProducer] = None,
-    ):
-        self.symbol = symbol
-        self.venue = venue
-        self.wall_clock_sleep = wall_clock_sleep
-
-        # simulation engine
-        self.sim = MarketSimulator(initial_price=100.0, rng_seed=rng_seed)
-
-        # producer wired to kafka
-        if producer is None:
-            cfg = BusConfig()
-            registry = DummySchemaRegistry()
-            self.producer = JsonProducer(cfg, registry)
-        else:
-            self.producer = producer
-
-        self.quote_topic = QUOTE_TOPIC
-        self.trade_topic = TRADE_TOPIC
-        self.option_topic = OPTION_TOPIC
-
-    def _quote_msg(self, tick: MarketTickEvent) -> Dict[str, Any]:
-        return {
-            "type": "quote",
-            "symbol": self.symbol,
-            "venue": self.venue,
-            "ts": tick.ts,
-            "bid_px": tick.bid,
-            "bid_sz": tick.bid_size,
-            "ask_px": tick.ask,
-            "ask_sz": tick.ask_size,
-            "mid_px": tick.mid,
-        }
-
-    def _trade_msg(self, tr: TradeEvent) -> Dict[str, Any]:
-        return {
-            "type": "trade",
-            "symbol": self.symbol,
-            "venue": self.venue,
-            "ts": tr.ts,
-            "price": tr.price,
-            "qty": tr.qty,
-            "side": tr.side,
-        }
-
-    def _option_quote_msg(self, quote: Dict[str, Any]) -> Dict[str, Any]:
-        opt_type = quote.get("option_type", "CALL")
-        opt_code = "C" if opt_type == "CALL" else "P"
-
-        strike = float(quote.get("strike", 0.0))
-        mid_px = float(quote.get("mid_px", 0.0))
-
-        # quote level noise
-        noise_std = self.sim.cfg.option_chain.price_noise_std
-        if noise_std > 0.0:
-            rel_noise = self.sim.rng.normal(0.0, noise_std)
-            mid_px = max(mid_px * (1.0 + rel_noise), 0.0)
-
-        base_spread = 0.01
-        spread = max(
-            base_spread,
-            0.01 * mid_px,
-        )
-        bid_px = max(mid_px - 0.5 * spread, 0.0)
-        ask_px = mid_px + 0.5 * spread
-
-        ts_iso = quote.get("ts", "")
-        expiry_iso = quote.get("expiry", "")
-
-        if expiry_iso:
-            expiry_dt = datetime.fromisoformat(expiry_iso)
-            expiry_str = expiry_dt.strftime("%Y%m%d")
-            symbol = f"{self.symbol}-{expiry_str}-{opt_code}-{strike:.2f}"
-        else:
-            symbol = f"{self.symbol}-{opt_code}-{strike:.2f}"
-
-        return {
-            "type": "option_quote",
-            "symbol": symbol,
-            "underlier": self.symbol,
-            "venue": self.venue,
-            "ts": ts_iso,
-            "expiry": expiry_iso,
-            "time_to_expiry": quote.get("time_to_expiry"),
-            "option_type": opt_code,
-            "strike": strike,
-            "mid_px": mid_px,
-            "bid_px": bid_px,
-            "ask_px": ask_px,
-            "implied_vol": quote.get("implied_vol"),
-            "delta": quote.get("delta"),
-            "gamma": quote.get("gamma"),
-            "vega": quote.get("vega"),
-            "theta": quote.get("theta"),
-            "underlying_price": quote.get("underlying_price"),
-        }
-
-    def run(self, n_steps: Optional[int] = None) -> None:
-        step = 0
-
-        while n_steps is None or step < n_steps:
-            with metrics.time_histogram("feed_step_duration", engine="feed"):
-                out = self.sim.step()
-                tick: MarketTickEvent = out["tick"]
-                trades: List[TradeEvent] = out["trades"]
-                options: Optional[List[Dict[str, Any]]] = out.get("options")
-
-                self.producer.produce(
-                    topic=self.quote_topic,
-                    key=self.symbol.encode("utf-8"),
-                    payload=self._quote_msg(tick),
-                )
-
-                for tr in trades:
-                    self.producer.produce(
-                        topic=self.trade_topic,
-                        key=self.symbol.encode("utf-8"),
-                        payload=self._trade_msg(tr),
-                    )
-
-                if options:
-                    for opt in options:
-                        self.producer.produce(
-                            topic=self.option_topic,
-                            key=self.symbol.encode("utf-8"),
-                            payload=self._option_quote_msg(opt),
-                        )
-
-                self.producer.poll(0)
-
-            if self.wall_clock_sleep > 0:
-                time.sleep(self.wall_clock_sleep)
-
-            step += 1
-            metrics.inc_counter("feed_simulation_steps", engine="feed")
-
-        self.producer.flush()
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Simplified market simulator → Kafka feed")
-    parser.add_argument("--symbol", default="SPY", help="underlier symbol")
-    parser.add_argument("--venue", default="SIM", help="venue identifier")
-    parser.add_argument(
-        "--sleep",
-        type=float,
-        default=0.01,
-        help="sleep per step in seconds (0 = as fast as possible)",
-    )
-    parser.add_argument(
-        "--steps",
-        type=int,
-        default=0,
-        help="number of steps to run (0 = infinite)",
-    )
-    parser.add_argument("--seed", type=int, default=42, help="RNG seed")
-    parser.add_argument(
-        "--metrics-port",
-        type=int,
-        default=0,
-        help="Port to expose Prometheus metrics on (0 = disabled)",
-    )
-    return parser.parse_args()
-
-
-def main() -> None:
-    args = parse_args()
-    n_steps = args.steps if args.steps > 0 else None
-
-    # Start Prometheus metrics HTTP server, if requested.
-    if args.metrics_port and args.metrics_port > 0:
-        # Uses the default Prometheus REGISTRY, which bus.metrics also registers into.
-        start_http_server(args.metrics_port)
-
-    feed = MarketSimFeed(
-        symbol=args.symbol,
-        venue=args.venue,
-        wall_clock_sleep=args.sleep,
-        rng_seed=args.seed,
-    )
-    feed.run(n_steps=n_steps)
-
-
-if __name__ == "__main__":
-    main()
