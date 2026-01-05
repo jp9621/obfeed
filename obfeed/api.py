@@ -221,6 +221,14 @@ class FeedManager:
 feed_manager = FeedManager()
 
 
+@app.on_event("startup")
+async def startup_event():
+    """Auto-start the feed when the service starts."""
+    # Auto-start with default configuration
+    feed_manager.start()
+    print("OBFeed service started - market feed is running")
+
+
 @app.get("/")
 async def root():
     """Root endpoint."""
@@ -266,7 +274,11 @@ async def get_feed_state():
 async def get_current_quote():
     """Get current market quote."""
     if not feed_manager.running or not feed_manager.simulator:
-        raise HTTPException(status_code=400, detail="Feed is not running")
+        # Auto-start if not running (shouldn't happen with auto-start, but safety check)
+        feed_manager.start()
+    
+    if not feed_manager.simulator:
+        raise HTTPException(status_code=503, detail="Feed is initializing")
     
     # Generate a fresh quote
     price = feed_manager.simulator.current_price
@@ -286,7 +298,10 @@ async def get_current_quote():
 async def get_option_chain():
     """Get current option chain."""
     if not feed_manager.running or not feed_manager.simulator:
-        raise HTTPException(status_code=400, detail="Feed is not running")
+        feed_manager.start()
+    
+    if not feed_manager.simulator:
+        raise HTTPException(status_code=503, detail="Feed is initializing")
     
     spot = feed_manager.simulator.current_price
     ts = feed_manager.simulator._iso_ts()
@@ -313,7 +328,7 @@ async def get_orderbook(max_levels: int = 10):
 async def submit_order(request: OrderRequest):
     """Submit an order to the orderbook."""
     if not feed_manager.running:
-        raise HTTPException(status_code=400, detail="Feed is not running")
+        feed_manager.start()
     
     timestamp = time.time()
     

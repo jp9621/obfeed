@@ -1,21 +1,8 @@
 """
-OBFeed - Synthetic Market Feed and Orderbook Engine
+OBFeed - Synthetic Market Feed Service
 
-A library for generating synthetic market data, managing orderbooks,
-and creating option chains for testing and simulation purposes.
+A containerized service that provides synthetic market data feeds
+via REST API and WebSocket, similar to real market data providers.
 """
 
 __version__ = "0.1.0"
-
-from obfeed.engine import MarketSimulator, OptionChainGenerator, JumpDiffusion
-from obfeed.orderbook import OrderBookManager
-from obfeed.config import MarketSimConfig, OptionChainConfig
-
-__all__ = [
-    "MarketSimulator",
-    "OptionChainGenerator",
-    "JumpDiffusion",
-    "OrderBookManager",
-    "MarketSimConfig",
-    "OptionChainConfig",
-]

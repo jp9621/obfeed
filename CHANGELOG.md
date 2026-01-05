@@ -3,20 +3,16 @@
 ## [0.1.0] - 2024-01-XX
 
 ### Added
-- Complete restructuring of project into `obfeed` library package
+- Complete restructuring of project into `obfeed` service
 - Core engine modules:
   - `MarketSimulator` - Jump-diffusion price simulation
   - `OptionChainGenerator` - Black-Scholes option pricing with volatility surface
   - `OrderBookManager` - Orderbook management (requires C++ ob module)
 - REST API with FastAPI:
-  - Feed control endpoints (start/stop/state)
   - Market data endpoints (quote, options)
   - Orderbook endpoints (snapshot, order submission)
-  - Configuration management
+  - Feed auto-starts when service launches (like real market feeds)
 - WebSocket support for real-time market data streaming
-- Command-line interface (`obfeed` command):
-  - `obfeed server` - Run API server
-  - `obfeed feed` - Run standalone feed
 - Docker support:
   - Updated Dockerfile
   - docker-compose.yml for easy deployment
@@ -38,4 +34,5 @@
 
 ### Migration Notes
 - API is now REST-based instead of direct Kafka publishing
-- Configuration is now done via API or config files instead of command-line only
+- Configuration is now done via API
+- Service runs as containerized service only (no CLI)

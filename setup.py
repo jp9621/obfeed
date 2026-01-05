@@ -15,7 +15,7 @@ setup(
     version="0.1.0",
     author="Your Name",
     author_email="your.email@example.com",
-    description="Synthetic Market Feed and Orderbook Engine",
+    description="Synthetic Market Feed Service - REST API and WebSocket market data",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yourusername/obfeed",
@@ -40,9 +40,4 @@ setup(
         "pydantic>=2.0.0",
         "python-multipart>=0.0.6",
     ],
-    entry_points={
-        "console_scripts": [
-            "obfeed=obfeed.cli:main",
-        ],
-    },
 )
