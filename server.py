@@ -353,6 +353,40 @@ def run_simulation():
             time.sleep(1)
 
 
+def populate_initial_orders(ob: OrderBook, price: float, timestamp: float, levels: int = 15):
+    """Populate orderbook with initial limit orders."""
+    populate_orders_around_price(ob, price, timestamp, levels, start_order_id=1)
+
+
+def process_user_orders():
+    """Process pending user orders."""
+    global active_orders, orderbook
+    
+    if not orderbook:
+        return
+    
+    orders_to_remove = []
+    for order_id, order_info in active_orders.items():
+        if order_info["status"] == "FILLED":
+            orders_to_remove.append(order_id)
+            continue
+        
+        # For now, market orders execute immediately, limit orders wait for matching
+        if order_info["order_type"] == "MARKET":
+            side = OrderSide.Buy if order_info["side"] == "BUY" else OrderSide.Sell
+            trades = orderbook.matchOrder(side, 0.0, order_info["quantity"], time.time())
+            if trades:
+                filled_qty = sum(t.quantity for t in trades)
+                order_info["filled_quantity"] = filled_qty
+                if filled_qty >= order_info["quantity"]:
+                    order_info["status"] = "FILLED"
+                else:
+                    order_info["status"] = "PARTIALLY_FILLED"
+    
+    for order_id in orders_to_remove:
+        del active_orders[order_id]
+
+
 @app.on_event("startup")
 async def startup_event():
     """Start the simulation thread on server startup."""
