@@ -7,7 +7,7 @@
 - Core engine modules:
   - `MarketSimulator` - Jump-diffusion price simulation
   - `OptionChainGenerator` - Black-Scholes option pricing with volatility surface
-  - `OrderBookManager` - Orderbook management (supports C++ backend or Python-only)
+  - `OrderBookManager` - Orderbook management (requires C++ ob module)
 - REST API with FastAPI:
   - Feed control endpoints (start/stop/state)
   - Market data endpoints (quote, options)
@@ -30,7 +30,7 @@
 ### Changed
 - Extracted core logic into modular library structure
 - Removed Kafka dependencies (now optional/pluggable)
-- Made orderbook backend optional (works with or without C++ extensions)
+- Orderbook backend now requires C++ ob module (no Python fallback)
 
 ### Removed
 - Direct Kafka integration (can be added as plugin)
