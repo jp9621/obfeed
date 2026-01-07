@@ -50,12 +50,10 @@ class JumpDiffusion:
 
         c = self.cfg
 
-        # diffusion
         z = self.rng.normal()
         drift = (c.mu - 0.5 * c.sigma ** 2) * c.dt
         diffusion = c.sigma * math.sqrt(c.dt) * z
 
-        # jumps
         n_jumps = self.rng.poisson(c.jump_intensity * c.dt)
         jump_term = 0.0
         if n_jumps > 0:
@@ -91,7 +89,6 @@ def black_scholes_greeks(
     ttm = max(ttm, 0.0)
     vol = max(vol, 0.0)
 
-    # early return if ttm (time to maturity) is 0 or vol is too low
     if ttm == 0.0 or vol < 1e-12:
         intrinsic = max(spot - strike, 0.0) if option_type == "CALL" else max(strike - spot, 0.0)
         delta = 1.0 if (option_type == "CALL" and spot > strike) else 0.0
@@ -204,7 +201,6 @@ class OptionChainGenerator:
         """Calculate local volatility for a specific strike and expiry."""
         c = self.cfg
 
-        # term structure adjustment
         pivot = max(c.term_structure_pivot_days, 1e-6)
         rel = (days_to_expiry - pivot) / pivot
         term_scale = 1.0 + c.term_structure_slope * rel
@@ -212,7 +208,6 @@ class OptionChainGenerator:
 
         vol = base_vol * term_scale
 
-        # smile/skew in log-moneyness
         if spot > 0.0 and strike > 0.0:
             k = math.log(strike / spot)
         else:
@@ -222,11 +217,9 @@ class OptionChainGenerator:
         smile_factor = min(max(smile_factor, 0.2), 5.0)
         vol *= smile_factor
 
-        # vol level noise
         if c.vol_noise_std > 0.0:
             vol += float(self.rng.normal(0.0, c.vol_noise_std))
 
-        # clamp
         vol = max(vol, c.min_vol)
         vol = min(vol, c.max_vol)
         return vol
@@ -247,17 +240,14 @@ class OptionChainGenerator:
         n_expiries = len(self.cfg.expiries_days)
         n_moneyness = len(self.cfg.moneyness)
 
-        # for each expiry
         for days in self.cfg.expiries_days:
             days = max(days, 1e-6)
             ttm_years = days / 365.25
             expiry_dt = ts_dt + timedelta(days=days)
             expiry_iso = expiry_dt.isoformat()
 
-            # and for each moneyness
             for m in self.cfg.moneyness:
                 strike = max(spot * (1.0 + m), 1e-6)
-                # calculate the local vol for this (strike, expiry)
                 local_vol = self._local_vol(
                     spot=spot,
                     strike=strike,
@@ -265,9 +255,7 @@ class OptionChainGenerator:
                     base_vol=base_vol,
                 )
 
-                # and for each option type
                 for opt_type in ("CALL", "PUT"):
-                    # price the option using Black-Scholes
                     greeks = black_scholes_greeks(
                         spot=spot,
                         strike=strike,
@@ -327,7 +315,7 @@ class MarketSimulator:
         self.option_chain = OptionChainGenerator(self.cfg.option_chain, rng=self.rng)
 
         self.current_price = initial_price
-        self.t = 0.0  # simulation time in seconds
+        self.t = 0.0
         self.reference_time = datetime.now()
 
     def _iso_ts(self) -> str:
@@ -358,7 +346,6 @@ class MarketSimulator:
 
     def step(self) -> Dict[str, Any]:
         """Advance simulation by one step."""
-        # create tick and trades
         self.t += self.cfg.dt
         self.current_price = self.jump_process.step(self.current_price)
         mid = self.current_price

@@ -18,7 +18,6 @@ from obfeed.orderbook import OrderBookManager
 
 app = FastAPI(title="OBFeed API", version="0.1.0")
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,7 +27,6 @@ app.add_middleware(
 )
 
 
-# Request/Response models
 class StartRequest(BaseModel):
     """Request to start the feed."""
     config: Optional[Dict] = None
@@ -41,10 +39,10 @@ class StopRequest(BaseModel):
 
 class OrderRequest(BaseModel):
     """Request to submit an order."""
-    side: str  # "BUY" or "SELL"
+    side: str
     quantity: int
-    price: Optional[float] = None  # None for market orders
-    order_type: str = "LIMIT"  # "LIMIT" or "MARKET"
+    price: Optional[float] = None
+    order_type: str = "LIMIT"
 
 
 class ConfigUpdateRequest(BaseModel):
@@ -73,7 +71,6 @@ class OrderBookResponse(BaseModel):
     spread: float
 
 
-# Global state
 class FeedManager:
     """Manages feed state and execution."""
     
@@ -96,7 +93,6 @@ class FeedManager:
                 raise ValueError("Feed is already running")
             
             if config:
-                # Update config from dict
                 if "symbol" in config:
                     self.config.symbol = config["symbol"]
                 if "venue" in config:
@@ -119,7 +115,6 @@ class FeedManager:
             self.running = True
             self.step_count = 0
             
-            # Start simulation thread
             self.thread = threading.Thread(target=self._run_loop, daemon=True)
             self.thread.start()
             print(f"Feed thread started (running={self.running})", flush=True)
@@ -145,14 +140,12 @@ class FeedManager:
                 result = self.simulator.step()
                 self.step_count += 1
                 
-                # Broadcast to WebSocket clients
                 self._broadcast_update(result)
                 
-                # Sleep to control rate
                 if self.config.wall_clock_sleep > 0:
                     time.sleep(self.config.wall_clock_sleep)
                 else:
-                    time.sleep(0.01)  # Small sleep even if wall_clock_sleep is 0
+                    time.sleep(0.01)
                     
             except Exception as e:
                 print(f"Error in simulation loop: {e}")
@@ -192,15 +185,11 @@ class FeedManager:
             "options": options or [],
         }
         
-        # Always queue messages (clients will poll the queue)
-        # This ensures messages are available even if clients connect after feed starts
         with self._queue_lock:
             self._message_queue.append(message)
-            # Keep only last 100 messages to prevent memory issues
             if len(self._message_queue) > 100:
                 self._message_queue.pop(0)
         
-        # Debug: Print every 10th message to verify feed is running
         if self.step_count % 10 == 0:
             print(f"Feed step {self.step_count}: Mid=${tick.mid:.2f}, Queue size={len(self._message_queue)}, Clients={len(self.websocket_clients)}")
     
@@ -229,14 +218,12 @@ class FeedManager:
         )
 
 
-# Global feed manager instance
 feed_manager = FeedManager()
 
 
 @app.on_event("startup")
 async def startup_event():
     """Auto-start the feed when the service starts."""
-    # Auto-start with default configuration
     import sys
     print("STARTUP EVENT: Starting feed...", flush=True)
     try:
@@ -294,13 +281,11 @@ async def get_current_quote():
     """Get current market quote."""
     try:
         if not feed_manager.running or not feed_manager.simulator:
-            # Auto-start if not running (shouldn't happen with auto-start, but safety check)
             feed_manager.start()
         
         if not feed_manager.simulator:
             raise HTTPException(status_code=503, detail="Feed is initializing")
         
-        # Generate a fresh quote
         price = feed_manager.simulator.current_price
         tick = feed_manager.simulator._quote_from_price(price)
         
@@ -407,7 +392,6 @@ async def websocket_endpoint(websocket: WebSocket):
     print(f"WebSocket client connected. Feed running: {feed_manager.running}", flush=True)
     
     try:
-        # Send initial state
         try:
             state = feed_manager.get_state()
             await websocket.send_json({
@@ -420,53 +404,40 @@ async def websocket_endpoint(websocket: WebSocket):
             import traceback
             traceback.print_exc()
         
-        # Track the last message timestamp we've sent to this client
-        # Since the queue rotates (old messages removed when > 100), we track by timestamp
-        # Send the last few messages to get the client up to date
         last_sent_timestamp = None
         with feed_manager._queue_lock:
             queue_size = len(feed_manager._message_queue)
             if queue_size > 0:
-                # Send the last 10 messages (or all if less than 10)
                 start_idx = max(0, queue_size - 10)
                 recent_messages = feed_manager._message_queue[start_idx:]
                 for msg in recent_messages:
                     await websocket.send_json(msg)
-                # Track the timestamp of the last message we sent
                 if recent_messages:
                     last_sent_timestamp = recent_messages[-1].get("timestamp")
         
         print(f"WebSocket client ready. Sent {len(recent_messages) if queue_size > 0 else 0} recent messages, Feed running: {feed_manager.running}", flush=True)
         
-        # Keep connection alive and handle messages
         while True:
             try:
-                # Check for new messages from feed (check frequently)
                 with feed_manager._queue_lock:
-                    # Find messages newer than what we've sent
                     new_messages = []
                     for msg in feed_manager._message_queue:
                         msg_timestamp = msg.get("timestamp")
                         if last_sent_timestamp is None or msg_timestamp > last_sent_timestamp:
                             new_messages.append(msg)
                     
-                    # Send all new messages
                     if new_messages:
                         for msg in new_messages:
                             await websocket.send_json(msg)
-                        # Update last sent timestamp to the newest message
                         last_sent_timestamp = new_messages[-1].get("timestamp")
                 
-                # Try to receive message (with short timeout so we can check queue frequently)
                 try:
                     data = await asyncio.wait_for(websocket.receive_text(), timeout=0.05)
-                    # Echo back or handle commands
                     await websocket.send_json({
                         "type": "echo",
                         "data": json.loads(data),
                     })
                 except asyncio.TimeoutError:
-                    # No message received, continue to check queue again
                     continue
             except WebSocketDisconnect:
                 print("WebSocket client disconnected", flush=True)
