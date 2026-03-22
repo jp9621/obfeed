@@ -146,11 +146,17 @@ CMakeFiles/ob_engine.dir/src/OrderBook.cpp.o: /home/jp/dev/obfeed/ob/src/OrderBo
   /usr/include/bits/wctype-wchar.h \
   /usr/include/bits/wordsize.h \
   /usr/include/c++/15.2.1/algorithm \
+  /usr/include/c++/15.2.1/atomic \
+  /usr/include/c++/15.2.1/backward/auto_ptr.h \
   /usr/include/c++/15.2.1/backward/binders.h \
   /usr/include/c++/15.2.1/bit \
   /usr/include/c++/15.2.1/bits/algorithmfwd.h \
+  /usr/include/c++/15.2.1/bits/align.h \
   /usr/include/c++/15.2.1/bits/alloc_traits.h \
+  /usr/include/c++/15.2.1/bits/allocated_ptr.h \
   /usr/include/c++/15.2.1/bits/allocator.h \
+  /usr/include/c++/15.2.1/bits/atomic_base.h \
+  /usr/include/c++/15.2.1/bits/atomic_lockfree_defines.h \
   /usr/include/c++/15.2.1/bits/basic_ios.h \
   /usr/include/c++/15.2.1/bits/basic_ios.tcc \
   /usr/include/c++/15.2.1/bits/basic_string.h \
@@ -197,6 +203,9 @@ CMakeFiles/ob_engine.dir/src/OrderBook.cpp.o: /home/jp/dev/obfeed/ob/src/OrderBo
   /usr/include/c++/15.2.1/bits/range_access.h \
   /usr/include/c++/15.2.1/bits/refwrap.h \
   /usr/include/c++/15.2.1/bits/requires_hosted.h \
+  /usr/include/c++/15.2.1/bits/shared_ptr.h \
+  /usr/include/c++/15.2.1/bits/shared_ptr_atomic.h \
+  /usr/include/c++/15.2.1/bits/shared_ptr_base.h \
   /usr/include/c++/15.2.1/bits/specfun.h \
   /usr/include/c++/15.2.1/bits/std_abs.h \
   /usr/include/c++/15.2.1/bits/std_mutex.h \
@@ -213,6 +222,7 @@ CMakeFiles/ob_engine.dir/src/OrderBook.cpp.o: /home/jp/dev/obfeed/ob/src/OrderBo
   /usr/include/c++/15.2.1/bits/stl_map.h \
   /usr/include/c++/15.2.1/bits/stl_multimap.h \
   /usr/include/c++/15.2.1/bits/stl_pair.h \
+  /usr/include/c++/15.2.1/bits/stl_raw_storage_iter.h \
   /usr/include/c++/15.2.1/bits/stl_tempbuf.h \
   /usr/include/c++/15.2.1/bits/stl_tree.h \
   /usr/include/c++/15.2.1/bits/stl_uninitialized.h \
@@ -223,6 +233,7 @@ CMakeFiles/ob_engine.dir/src/OrderBook.cpp.o: /home/jp/dev/obfeed/ob/src/OrderBo
   /usr/include/c++/15.2.1/bits/stringfwd.h \
   /usr/include/c++/15.2.1/bits/uniform_int_dist.h \
   /usr/include/c++/15.2.1/bits/unique_lock.h \
+  /usr/include/c++/15.2.1/bits/unique_ptr.h \
   /usr/include/c++/15.2.1/bits/unordered_map.h \
   /usr/include/c++/15.2.1/bits/uses_allocator.h \
   /usr/include/c++/15.2.1/bits/uses_allocator_args.h \
@@ -249,6 +260,7 @@ CMakeFiles/ob_engine.dir/src/OrderBook.cpp.o: /home/jp/dev/obfeed/ob/src/OrderBo
   /usr/include/c++/15.2.1/ext/aligned_buffer.h \
   /usr/include/c++/15.2.1/ext/alloc_traits.h \
   /usr/include/c++/15.2.1/ext/atomicity.h \
+  /usr/include/c++/15.2.1/ext/concurrence.h \
   /usr/include/c++/15.2.1/ext/numeric_traits.h \
   /usr/include/c++/15.2.1/ext/string_conversions.h \
   /usr/include/c++/15.2.1/ext/type_traits.h \
@@ -259,11 +271,14 @@ CMakeFiles/ob_engine.dir/src/OrderBook.cpp.o: /home/jp/dev/obfeed/ob/src/OrderBo
   /usr/include/c++/15.2.1/istream \
   /usr/include/c++/15.2.1/limits \
   /usr/include/c++/15.2.1/map \
+  /usr/include/c++/15.2.1/memory \
   /usr/include/c++/15.2.1/mutex \
   /usr/include/c++/15.2.1/new \
+  /usr/include/c++/15.2.1/optional \
   /usr/include/c++/15.2.1/ostream \
   /usr/include/c++/15.2.1/pstl/execution_defs.h \
   /usr/include/c++/15.2.1/pstl/glue_algorithm_defs.h \
+  /usr/include/c++/15.2.1/pstl/glue_memory_defs.h \
   /usr/include/c++/15.2.1/pstl/pstl_config.h \
   /usr/include/c++/15.2.1/ratio \
   /usr/include/c++/15.2.1/shared_mutex \
@@ -805,8 +820,6 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/c++/15.2.1/pstl/glue_numeric_defs.h:
 
-/usr/include/c++/15.2.1/optional:
-
 /usr/include/c++/15.2.1/bits/random.tcc:
 
 /usr/include/c++/15.2.1/bits/random.h:
@@ -814,8 +827,6 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 /usr/include/wchar.h:
 
 /usr/include/sys/types.h:
-
-/usr/include/sys/single_threaded.h:
 
 /usr/include/c++/15.2.1/numeric:
 
@@ -831,11 +842,29 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/linux/errno.h:
 
-/usr/include/c++/15.2.1/bits/basic_ios.tcc:
+/usr/include/ctype.h:
 
-/usr/include/bits/libm-simd-decl-stubs.h:
+/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/gthr.h:
 
-/usr/include/c++/15.2.1/cerrno:
+/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/gthr-default.h:
+
+/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/error_constants.h:
+
+/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/ctype_inline.h:
+
+/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/ctype_base.h:
+
+/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/c++locale.h:
+
+/usr/include/c++/15.2.1/unordered_map:
+
+/usr/include/c++/15.2.1/typeinfo:
+
+/usr/include/errno.h:
+
+/usr/include/c++/15.2.1/tuple:
+
+/usr/include/c++/15.2.1/tr1/special_function_util.h:
 
 /usr/include/c++/15.2.1/bits/alloc_traits.h:
 
@@ -863,8 +892,6 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/c++/15.2.1/bits/stl_pair.h:
 
-/usr/include/ctype.h:
-
 /usr/include/bits/types/struct_sched_param.h:
 
 /usr/include/bits/types/sigset_t.h:
@@ -879,15 +906,9 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/c++/15.2.1/type_traits:
 
-/home/jp/dev/obfeed/ob/src/Simulator.cpp:
-
-/usr/include/c++/15.2.1/debug/debug.h:
-
 /usr/include/bits/stdlib-float.h:
 
 /usr/include/bits/time64.h:
-
-/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/ctype_base.h:
 
 /usr/include/bits/select.h:
 
@@ -899,6 +920,10 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/c++/15.2.1/pstl/pstl_config.h:
 
+/usr/include/c++/15.2.1/tr1/riemann_zeta.tcc:
+
+/usr/include/bits/types/__fpos_t.h:
+
 /usr/include/bits/types/clock_t.h:
 
 /usr/include/bits/mathcalls-macros.h:
@@ -908,6 +933,12 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 /usr/include/c++/15.2.1/map:
 
 /usr/include/bits/locale.h:
+
+/usr/include/bits/libm-simd-decl-stubs.h:
+
+/usr/include/c++/15.2.1/bits/basic_ios.tcc:
+
+/usr/include/c++/15.2.1/cerrno:
 
 /usr/include/bits/fp-logb.h:
 
@@ -919,13 +950,13 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/bits/flt-eval-method.h:
 
+/usr/include/c++/15.2.1/atomic:
+
 /usr/include/bits/floatn.h:
 
 /usr/include/bits/errno.h:
 
 /usr/include/bits/byteswap.h:
-
-/usr/include/c++/15.2.1/tr1/special_function_util.h:
 
 /usr/include/bits/types/struct_FILE.h:
 
@@ -935,11 +966,19 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/asm-generic/posix_types.h:
 
-/usr/include/c++/15.2.1/bits/locale_classes.tcc:
-
 /usr/include/c++/15.2.1/bits/unique_lock.h:
 
 /usr/include/c++/15.2.1/tr1/poly_laguerre.tcc:
+
+/home/jp/dev/obfeed/ob/src/Simulator.cpp:
+
+/usr/include/c++/15.2.1/debug/debug.h:
+
+/usr/include/c++/15.2.1/bits/align.h:
+
+/usr/include/c++/15.2.1/bits/functexcept.h:
+
+/usr/include/c++/15.2.1/streambuf:
 
 /usr/include/asm-generic/errno-base.h:
 
@@ -967,8 +1006,6 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/bits/stdio.h:
 
-/usr/include/c++/15.2.1/debug/assertions.h:
-
 /usr/include/c++/15.2.1/new:
 
 /usr/include/bits/pthread_stack_min-dynamic.h:
@@ -978,6 +1015,8 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 /usr/include/bits/types/error_t.h:
 
 /usr/include/c++/15.2.1/bits/requires_hosted.h:
+
+/usr/include/c++/15.2.1/backward/auto_ptr.h:
 
 /usr/include/c++/15.2.1/bits/locale_facets.h:
 
@@ -999,17 +1038,15 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/c++/15.2.1/pstl/execution_defs.h:
 
-/usr/include/errno.h:
-
-/usr/include/c++/15.2.1/tuple:
-
 /usr/include/bits/types/__locale_t.h:
 
 /usr/include/c++/15.2.1/bits/chrono.h:
 
-/usr/include/c++/15.2.1/bit:
+/usr/include/c++/15.2.1/bits/allocated_ptr.h:
 
-/usr/include/c++/15.2.1/bits/basic_ios.h:
+/usr/include/c++/15.2.1/cwctype:
+
+/usr/include/c++/15.2.1/istream:
 
 /usr/include/bits/waitstatus.h:
 
@@ -1037,6 +1074,10 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/bits/long-double.h:
 
+/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/atomic_word.h:
+
+/usr/include/c++/15.2.1/bits/parse_numbers.h:
+
 /usr/include/bits/types/locale_t.h:
 
 /usr/include/bits/stdint-least.h:
@@ -1063,10 +1104,6 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/c++/15.2.1/tr1/ell_integral.tcc:
 
-/usr/include/c++/15.2.1/bits/parse_numbers.h:
-
-/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/atomic_word.h:
-
 /usr/include/c++/15.2.1/bits/allocator.h:
 
 /usr/include/bits/time.h:
@@ -1090,6 +1127,8 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 /usr/include/bits/thread-shared-types.h:
 
 /usr/include/c++/15.2.1/ios:
+
+/usr/include/c++/15.2.1/pstl/glue_memory_defs.h:
 
 /usr/include/bits/pthreadtypes-arch.h:
 
@@ -1157,17 +1196,23 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/c++/15.2.1/iostream:
 
+/usr/include/c++/15.2.1/bits/atomic_base.h:
+
+/usr/include/c++/15.2.1/bit:
+
+/usr/include/c++/15.2.1/bits/basic_ios.h:
+
 /usr/include/bits/mathcalls-helper-functions.h:
 
 /usr/include/c++/15.2.1/bits/charconv.h:
 
 /usr/include/c++/15.2.1/bits/concept_check.h:
 
-/usr/include/c++/15.2.1/bits/cxxabi_forced.h:
-
 /usr/include/c++/15.2.1/bits/cxxabi_init_exception.h:
 
 /usr/include/c++/15.2.1/bits/deque.tcc:
+
+/usr/include/c++/15.2.1/memory:
 
 /usr/include/c++/15.2.1/tr1/legendre_function.tcc:
 
@@ -1175,13 +1220,13 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/c++/15.2.1/bits/erase_if.h:
 
+/usr/include/c++/15.2.1/debug/assertions.h:
+
+/usr/include/c++/15.2.1/bits/shared_ptr_base.h:
+
 /usr/include/c++/15.2.1/vector:
 
 /usr/include/c++/15.2.1/bits/exception_defines.h:
-
-/usr/include/c++/15.2.1/bits/functexcept.h:
-
-/usr/include/c++/15.2.1/streambuf:
 
 /usr/include/c++/15.2.1/bits/stl_numeric.h:
 
@@ -1249,13 +1294,9 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/c++/15.2.1/bits/streambuf.tcc:
 
-/usr/include/c++/15.2.1/unordered_map:
-
 /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdarg.h:
 
 /usr/include/c++/15.2.1/bits/ostream.tcc:
-
-/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/error_constants.h:
 
 /usr/include/c++/15.2.1/bits/ostream_insert.h:
 
@@ -1266,6 +1307,16 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 /usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/c++allocator.h:
 
 /usr/include/c++/15.2.1/bits/range_access.h:
+
+/usr/include/sys/single_threaded.h:
+
+/usr/include/c++/15.2.1/bits/shared_ptr.h:
+
+/usr/include/c++/15.2.1/tr1/bessel_function.tcc:
+
+/usr/include/c++/15.2.1/bits/locale_classes.tcc:
+
+/usr/include/c++/15.2.1/bits/shared_ptr_atomic.h:
 
 /usr/include/c++/15.2.1/bits/specfun.h:
 
@@ -1280,6 +1331,8 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 /usr/include/c++/15.2.1/bits/stl_multimap.h:
 
 /usr/include/c++/15.2.1/deque:
+
+/usr/include/c++/15.2.1/bits/stl_raw_storage_iter.h:
 
 /usr/include/asm-generic/errno.h:
 
@@ -1306,6 +1359,8 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 /usr/include/c++/15.2.1/cwchar:
 
 /usr/include/c++/15.2.1/bits/uniform_int_dist.h:
+
+/usr/include/c++/15.2.1/bits/unique_ptr.h:
 
 /usr/include/c++/15.2.1/bits/unordered_map.h:
 
@@ -1339,23 +1394,25 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 
 /usr/include/c++/15.2.1/cstddef:
 
-/usr/include/c++/15.2.1/cwctype:
-
-/usr/include/c++/15.2.1/istream:
-
 /usr/include/c++/15.2.1/mutex:
 
 /usr/include/c++/15.2.1/ext/alloc_traits.h:
 
+/usr/include/c++/15.2.1/bits/cxxabi_forced.h:
+
+/usr/include/c++/15.2.1/ext/concurrence.h:
+
 /usr/include/c++/15.2.1/initializer_list:
+
+/usr/include/c++/15.2.1/bits/atomic_lockfree_defines.h:
 
 /usr/include/bits/types/struct_timeval.h:
 
 /usr/include/c++/15.2.1/iosfwd:
 
-/usr/include/c++/15.2.1/string_view:
+/usr/include/c++/15.2.1/optional:
 
-/usr/include/c++/15.2.1/tr1/bessel_function.tcc:
+/usr/include/c++/15.2.1/string_view:
 
 /usr/include/c++/15.2.1/tr1/exp_integral.tcc:
 
@@ -1366,17 +1423,3 @@ CMakeFiles/ob_engine.dir/src/Simulator.cpp.o: /home/jp/dev/obfeed/ob/src/Simulat
 /usr/include/bits/types/timer_t.h:
 
 /usr/include/c++/15.2.1/tr1/poly_hermite.tcc:
-
-/usr/include/bits/types/__fpos_t.h:
-
-/usr/include/c++/15.2.1/tr1/riemann_zeta.tcc:
-
-/usr/include/c++/15.2.1/typeinfo:
-
-/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/c++locale.h:
-
-/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/ctype_inline.h:
-
-/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/gthr-default.h:
-
-/usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/gthr.h:
