@@ -19,3 +19,9 @@ target_link_libraries(ob_engine PUBLIC Threads::Threads)
 # Standalone executable
 add_executable(ob_main main.cpp)
 target_link_libraries(ob_main PRIVATE ob_engine)
+
+# Multithreaded benchmark
+add_executable(bench_mt bench_mt.cpp)
+target_link_libraries(bench_mt PRIVATE ob_engine)
+target_compile_options(bench_mt PRIVATE -O3 -march=native)
+target_compile_options(ob_engine PRIVATE -O3 -march=native)

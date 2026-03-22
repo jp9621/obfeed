@@ -1,291 +1,306 @@
-// bench_mt.cpp — multithreaded order book throughput benchmark
-//
-// Measures how both books scale when N threads hammer the same book
-// concurrently. Each thread submits its own pre-generated workload;
-// all threads start simultaneously via a manual spinbarrier.
-//
-// Build (from ob/build):
-//   cmake .. && cmake --build . --target bench_mt
-// Run:
-//   ./bench_mt
-
 #include "OrderBook.h"
 #include "Order.h"
 
-#include <algorithm>
-#include <atomic>
-#include <chrono>
-#include <cmath>
-#include <deque>
-#include <iomanip>
-#include <iostream>
 #include <map>
+#include <deque>
 #include <mutex>
-#include <random>
-#include <thread>
 #include <vector>
+#include <atomic>
+#include <thread>
+#include <chrono>
+#include <random>
+#include <iostream>
+#include <iomanip>
+#include <limits>
+#include <algorithm>
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Naive order book (identical to bench.cpp)
-// ─────────────────────────────────────────────────────────────────────────────
-
-struct NaiveOrder {
-    int       id;
-    double    price;
-    int       qty;
-    OrderSide side;
-};
-
+// ============================================================
+// NaiveOrderBook
+//   - std::mutex  (no shared reads – all ops serialize)
+//   - single std::map (O(log n) price lookup, no hash-map fast path)
+//   - no per-level locking
+// ============================================================
 class NaiveOrderBook {
 public:
-    std::map<double, std::deque<NaiveOrder*>, std::greater<double>> _bids;
-    std::map<double, std::deque<NaiveOrder*>>                       _asks;
-    mutable std::mutex _mtx;
-
-    ~NaiveOrderBook() {
-        for (auto& [p, q] : _bids) for (auto* o : q) delete o;
-        for (auto& [p, q] : _asks) for (auto* o : q) delete o;
-    }
-
-    void insert(int id, double price, int qty, OrderSide side) {
+    void insertOrder(const Order& order) {
         std::lock_guard<std::mutex> lk(_mtx);
-        if (side == OrderSide::Buy) {
-            while (!_asks.empty() && price >= _asks.begin()->first && qty > 0) {
-                auto& [ap, aq] = *_asks.begin();
-                while (!aq.empty() && qty > 0) {
-                    int fill = std::min(qty, aq.front()->qty);
-                    qty -= fill;
-                    aq.front()->qty -= fill;
-                    if (aq.front()->qty == 0) { delete aq.front(); aq.pop_front(); }
-                }
-                if (aq.empty()) _asks.erase(_asks.begin());
-            }
-            if (qty > 0) _bids[price].push_back(new NaiveOrder{id, price, qty, side});
+        auto& lvl = _book[order.getPrice()];
+        if (order.getSide() == OrderSide::Buy) {
+            lvl.bids.push_back(order);
+            lvl.bidQty += order.getQuantity();
         } else {
-            while (!_bids.empty() && price <= _bids.begin()->first && qty > 0) {
-                auto& [bp, bq] = *_bids.begin();
-                while (!bq.empty() && qty > 0) {
-                    int fill = std::min(qty, bq.front()->qty);
-                    qty -= fill;
-                    bq.front()->qty -= fill;
-                    if (bq.front()->qty == 0) { delete bq.front(); bq.pop_front(); }
-                }
-                if (bq.empty()) _bids.erase(_bids.begin());
-            }
-            if (qty > 0) _asks[price].push_back(new NaiveOrder{id, price, qty, side});
+            lvl.asks.push_back(order);
+            lvl.askQty += order.getQuantity();
         }
     }
 
-    bool cancel(int id, double price, OrderSide side) {
+    bool cancelOrder(int orderId, double price) {
         std::lock_guard<std::mutex> lk(_mtx);
-        if (side == OrderSide::Buy) {
-            auto it = _bids.find(price);
-            if (it == _bids.end()) return false;
-            auto& q = it->second;
-            for (auto qit = q.begin(); qit != q.end(); ++qit) {
-                if ((*qit)->id == id) { delete *qit; q.erase(qit); return true; }
+        auto it = _book.find(price);
+        if (it == _book.end()) return false;
+        auto& lvl = it->second;
+        for (auto b = lvl.bids.begin(); b != lvl.bids.end(); ++b) {
+            if (b->getId() == orderId) {
+                lvl.bidQty -= b->getQuantity();
+                lvl.bids.erase(b);
+                if (lvl.isEmpty()) _book.erase(it);
+                return true;
             }
-        } else {
-            auto it = _asks.find(price);
-            if (it == _asks.end()) return false;
-            auto& q = it->second;
-            for (auto qit = q.begin(); qit != q.end(); ++qit) {
-                if ((*qit)->id == id) { delete *qit; q.erase(qit); return true; }
+        }
+        for (auto a = lvl.asks.begin(); a != lvl.asks.end(); ++a) {
+            if (a->getId() == orderId) {
+                lvl.askQty -= a->getQuantity();
+                lvl.asks.erase(a);
+                if (lvl.isEmpty()) _book.erase(it);
+                return true;
             }
         }
         return false;
     }
+
+    double getBestBid() {
+        std::lock_guard<std::mutex> lk(_mtx);
+        for (auto it = _book.rbegin(); it != _book.rend(); ++it)
+            if (it->second.bidQty > 0) return it->first;
+        return 0.0;
+    }
+
+    double getBestAsk() {
+        std::lock_guard<std::mutex> lk(_mtx);
+        for (auto it = _book.begin(); it != _book.end(); ++it)
+            if (it->second.askQty > 0) return it->first;
+        return std::numeric_limits<double>::max();
+    }
+
+private:
+    struct Level {
+        std::deque<Order> bids, asks;
+        int bidQty = 0, askQty = 0;
+        bool isEmpty() const { return bids.empty() && asks.empty(); }
+    };
+    std::map<double, Level> _book;
+    std::mutex _mtx;
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Workload (same as bench.cpp)
-// ─────────────────────────────────────────────────────────────────────────────
+// ============================================================
+// Workload definitions
+// ============================================================
+enum class Workload { InsertOnly, ReadHeavy, Mixed };
 
-struct Op {
-    enum Type { INSERT, CANCEL } type;
-    int       id;
-    double    price;
-    int       qty;
-    OrderSide side;
-};
+static const char* wlLabel(Workload w) {
+    switch (w) {
+        case Workload::InsertOnly: return "Insert-Only (100% insert)";
+        case Workload::ReadHeavy:  return "Read-Heavy  ( 80% read, 20% insert)";
+        case Workload::Mixed:      return "Mixed       ( 50% insert, 30% read, 20% cancel)";
+    }
+    return "";
+}
 
-static std::vector<Op> make_workload(int n, uint64_t seed) {
-    std::mt19937_64 rng(seed);
-    std::uniform_real_distribution<double> price_dist(10.0, 990.0);
-    std::uniform_int_distribution<int>     qty_dist(1, 100);
-    std::uniform_int_distribution<int>     side_dist(0, 1);
-    std::uniform_real_distribution<double> op_dist(0.0, 1.0);
+// ============================================================
+// Pre-generated order pool – avoids RNG jitter on the hot path
+//   Bids: 90.00 – 90.19   (20 levels, never cross asks)
+//   Asks: 91.00 – 91.19   (20 levels, never cross bids)
+// ============================================================
+static constexpr int    POOL_SZ  = 1 << 16;  // 64 K, power-of-two for fast mod
+static constexpr int    N_LEVELS = 20;
+static constexpr double BID_BASE = 90.00;
+static constexpr double ASK_BASE = 91.00;
+static constexpr double TICK     = 0.01;
 
-    struct LiveOrder { int id; double price; OrderSide side; };
-    std::vector<LiveOrder> live;
-    live.reserve(n / 2);
+struct Pool {
+    struct Entry { double price; int qty; OrderSide side; };
+    Entry e[POOL_SZ];
 
-    std::vector<Op> ops;
-    ops.reserve(n);
-    int next_id = 1;
-
-    for (int i = 0; i < n; ++i) {
-        if (!live.empty() && op_dist(rng) < 0.15) {
-            std::uniform_int_distribution<size_t> pick(0, live.size() - 1);
-            size_t idx = pick(rng);
-            ops.push_back({Op::CANCEL, live[idx].id, live[idx].price, 0, live[idx].side});
-            live.erase(live.begin() + idx);
-        } else {
-            double raw   = price_dist(rng);
-            double price = std::round(raw * 100.0) / 100.0;
-            int    qty   = qty_dist(rng);
-            OrderSide side = (side_dist(rng) == 0) ? OrderSide::Buy : OrderSide::Sell;
-            int id = next_id++;
-            ops.push_back({Op::INSERT, id, price, qty, side});
-            live.push_back({id, price, side});
+    explicit Pool(int seed) {
+        std::mt19937 rng(seed);
+        std::uniform_int_distribution<int> qty(1, 100);
+        std::uniform_int_distribution<int> lvl(0, N_LEVELS - 1);
+        for (int i = 0; i < POOL_SZ; ++i) {
+            OrderSide side = (i & 1) ? OrderSide::Buy : OrderSide::Sell;
+            e[i].price = (side == OrderSide::Buy)
+                       ? BID_BASE + lvl(rng) * TICK
+                       : ASK_BASE + lvl(rng) * TICK;
+            e[i].qty  = qty(rng);
+            e[i].side = side;
         }
     }
-    return ops;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Spinbarrier — all threads spin until every thread has checked in, then go
-// ─────────────────────────────────────────────────────────────────────────────
-
-struct SpinBarrier {
-    std::atomic<int>  arrived{0};
-    std::atomic<bool> go{false};
-    const int         total;
-
-    explicit SpinBarrier(int n) : total(n) {}
-
-    void wait() {
-        arrived.fetch_add(1, std::memory_order_release);
-        while (arrived.load(std::memory_order_acquire) < total)
-            ; // spin
-        go.store(true, std::memory_order_release);
-        while (!go.load(std::memory_order_acquire))
-            ; // spin until coordinator broadcasts
-    }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Book adapters — uniform interface for both implementations
-// ─────────────────────────────────────────────────────────────────────────────
+// ============================================================
+// Benchmark runner (templated so it works on both book types)
+// ============================================================
+static constexpr int BENCH_MS = 3000;
+static constexpr int PRELOAD  = 400;   // orders seeded before the timer starts
 
-static void run_op(OrderBook& ob, const Op& op) {
-    if (op.type == Op::INSERT)
-        ob.insertOrder(Order(op.id, op.price, op.qty, op.side, 0.0));
-    else
-        ob.cancelOrder(op.id, op.price);
-}
-
-static void run_op(NaiveOrderBook& nb, const Op& op) {
-    if (op.type == Op::INSERT)
-        nb.insert(op.id, op.price, op.qty, op.side);
-    else
-        nb.cancel(op.id, op.price, op.side);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Timed multithreaded run
-//   Returns total ops/s (all threads combined) for the median of N_RUNS runs.
-// ─────────────────────────────────────────────────────────────────────────────
+struct Result { double mops; };
 
 template<typename Book>
-static double run_mt(int n_threads, int ops_per_thread, int n_runs, uint64_t base_seed) {
-    std::vector<double> elapsed_ns(n_runs);
+Result runBench(int nThreads, Workload wl) {
+    // Build per-thread pools (avoids cache thrashing on a shared pool)
+    std::vector<Pool> pools;
+    pools.reserve(nThreads);
+    for (int i = 0; i < nThreads; ++i)
+        pools.emplace_back(i * 31337 + 1);
 
-    for (int r = 0; r < n_runs; ++r) {
-        // Pre-generate one workload per thread (different seeds → different price
-        // sequences, same distribution — avoids all threads hammering the same levels).
-        std::vector<std::vector<Op>> workloads(n_threads);
-        for (int t = 0; t < n_threads; ++t)
-            workloads[t] = make_workload(ops_per_thread, base_seed + r * 100 + t);
+    Book book;
 
-        Book book;
-        SpinBarrier barrier(n_threads);
-
-        // Per-thread end timestamps; we measure wall time = max(end) - min(start).
-        std::vector<std::chrono::steady_clock::time_point> t_start(n_threads);
-        std::vector<std::chrono::steady_clock::time_point> t_end(n_threads);
-
-        std::vector<std::thread> threads;
-        threads.reserve(n_threads);
-
-        for (int t = 0; t < n_threads; ++t) {
-            threads.emplace_back([&, t] {
-                barrier.wait();
-                t_start[t] = std::chrono::steady_clock::now();
-                for (const auto& op : workloads[t])
-                    run_op(book, op);
-                t_end[t] = std::chrono::steady_clock::now();
-            });
+    // Seed the book so read ops and cancel ops have something to act on
+    {
+        std::mt19937 rng(0);
+        std::uniform_int_distribution<int> qty(1, 100);
+        for (int i = 0; i < PRELOAD; ++i) {
+            book.insertOrder(Order(3'000'000 + i * 2,
+                BID_BASE + (i % N_LEVELS) * TICK, qty(rng), OrderSide::Buy,  0.0));
+            book.insertOrder(Order(3'000'000 + i * 2 + 1,
+                ASK_BASE + (i % N_LEVELS) * TICK, qty(rng), OrderSide::Sell, 0.0));
         }
-
-        for (auto& th : threads) th.join();
-
-        auto wall_start = *std::min_element(t_start.begin(), t_start.end());
-        auto wall_end   = *std::max_element(t_end.begin(),   t_end.end());
-        elapsed_ns[r] = static_cast<double>(
-            std::chrono::duration_cast<std::chrono::nanoseconds>(wall_end - wall_start).count());
     }
 
-    std::sort(elapsed_ns.begin(), elapsed_ns.end());
-    double med_ns = elapsed_ns[n_runs / 2];
-    long total_ops = static_cast<long>(n_threads) * ops_per_thread;
-    return total_ops / (med_ns / 1e9);
+    std::atomic<bool> go{false}, stop{false};
+    std::vector<uint64_t> counts(nThreads, 0);
+
+    auto worker = [&](int tid) {
+        const Pool& pool = pools[tid];
+        uint64_t&   cnt  = counts[tid];
+
+        std::mt19937 rng(tid * 999983 + 7);
+        std::uniform_int_distribution<int> pct(0, 99);
+
+        // Cancel ring: remembers recently inserted (id, price) pairs
+        static constexpr int RING = 256;
+        std::pair<int, double> ring[RING];
+        for (auto& r : ring) r = {-1, 0.0};
+        int ringHead   = 0;
+        int orderCtr   = 0;  // thread-local counter → unique order IDs
+        int poolIdx    = 0;
+
+        // The base ID block for this thread (avoid collision with seeding ids)
+        const int idBase = tid * (1 << 20);  // 1M IDs per thread
+
+        while (!go.load(std::memory_order_acquire)) {}
+
+        while (!stop.load(std::memory_order_relaxed)) {
+            int roll = pct(rng);
+
+            bool doInsert = false, doRead = false, doCancel = false;
+            switch (wl) {
+                case Workload::InsertOnly:
+                    doInsert = true; break;
+                case Workload::ReadHeavy:
+                    doRead   = roll < 80;
+                    doInsert = !doRead; break;
+                case Workload::Mixed:
+                    doInsert = roll < 50;
+                    doRead   = roll >= 50 && roll < 80;
+                    doCancel = roll >= 80; break;
+            }
+
+            if (doInsert) {
+                const auto& tmpl = pool.e[poolIdx & (POOL_SZ - 1)];
+                int id = idBase + (orderCtr & ((1 << 20) - 1));
+                Order o(id, tmpl.price, tmpl.qty, tmpl.side, 0.0);
+                book.insertOrder(o);
+                ring[ringHead & (RING - 1)] = {id, tmpl.price};
+                ++ringHead;
+                ++poolIdx;
+                ++orderCtr;
+            } else if (doRead) {
+                if (roll & 1) (void)book.getBestBid();
+                else          (void)book.getBestAsk();
+            } else { // doCancel
+                int slot = rng() & (RING - 1);
+                auto [oid, oprice] = ring[slot];
+                if (oid >= 0) {
+                    book.cancelOrder(oid, oprice);
+                    ring[slot] = {-1, 0.0};
+                }
+            }
+            ++cnt;
+        }
+    };
+
+    std::vector<std::thread> threads;
+    threads.reserve(nThreads);
+    for (int i = 0; i < nThreads; ++i)
+        threads.emplace_back(worker, i);
+
+    go.store(true, std::memory_order_release);
+    auto t0 = std::chrono::steady_clock::now();
+    std::this_thread::sleep_for(std::chrono::milliseconds(BENCH_MS));
+    stop.store(true, std::memory_order_relaxed);
+    for (auto& t : threads) t.join();
+
+    double elapsed = std::chrono::duration<double>(
+        std::chrono::steady_clock::now() - t0).count();
+
+    uint64_t total = 0;
+    for (auto c : counts) total += c;
+    return { total / elapsed / 1e6 };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Main
-// ─────────────────────────────────────────────────────────────────────────────
-
+// ============================================================
+// main
+// ============================================================
 int main() {
-    constexpr int      OPS_PER_THREAD = 200'000;
-    constexpr int      N_RUNS         = 3;
-    constexpr uint64_t SEED           = 42;
+    unsigned int hw = std::thread::hardware_concurrency();
 
-    const int max_threads = static_cast<int>(std::thread::hardware_concurrency());
-    const std::vector<int> thread_counts = [&] {
-        std::vector<int> v;
-        for (int t = 1; t <= max_threads; t *= 2)
-            v.push_back(t);
-        return v;
-    }();
+    // Thread counts to test; deduplicated
+    std::vector<int> tcs = {1, 2, 4, 8};
+    if (hw > 0 && std::find(tcs.begin(), tcs.end(), (int)hw) == tcs.end())
+        tcs.push_back((int)hw);
 
-    std::cout << std::fixed << std::setprecision(2);
-    std::cout << "=== Multithreaded order book benchmark: optimized vs naive ===\n";
-    std::cout << "ops/thread: " << OPS_PER_THREAD
-              << "  (85% limit inserts, 15% cancels)  |  runs: " << N_RUNS << "\n\n";
+    const std::vector<Workload> workloads = {
+        Workload::InsertOnly,
+        Workload::ReadHeavy,
+        Workload::Mixed,
+    };
 
-    // column widths
-    std::cout << std::setw(9)  << "threads"
-              << std::setw(20) << "optimized ops/s"
-              << std::setw(18) << "naive ops/s"
-              << std::setw(14) << "opt scaling"
-              << std::setw(14) << "naive scaling"
-              << "\n"
-              << std::string(75, '-') << "\n";
+    std::cout << "\n";
+    std::cout << "╔══════════════════════════════════════════════════════╗\n";
+    std::cout << "║       Order Book Multithreaded Benchmark             ║\n";
+    std::cout << "╚══════════════════════════════════════════════════════╝\n";
+    std::cout << "  Duration per run : " << BENCH_MS   << " ms\n";
+    std::cout << "  Hardware threads : " << hw          << "\n";
+    std::cout << "  Price levels     : " << N_LEVELS * 2 << " (bid + ask)\n";
+    std::cout << "  Preloaded orders : " << PRELOAD * 2  << "\n";
+    std::cout << "\n";
+    std::cout << "  Implementations compared\n";
+    std::cout << "  ├─ Naive  : std::mutex, std::map only, no per-level lock\n";
+    std::cout << "  └─ Opt    : std::shared_mutex, map + unordered_map, per-level lock\n";
+    std::cout << "\n";
 
-    double opt_base  = 0.0;
-    double naive_base = 0.0;
-
-    for (int t : thread_counts) {
-        double opt_tput   = run_mt<OrderBook>     (t, OPS_PER_THREAD, N_RUNS, SEED);
-        double naive_tput = run_mt<NaiveOrderBook>(t, OPS_PER_THREAD, N_RUNS, SEED + 500);
-
-        if (t == 1) { opt_base = opt_tput; naive_base = naive_tput; }
-
-        double opt_scale   = opt_tput   / opt_base;
-        double naive_scale = naive_tput / naive_base;
-
-        std::cout << std::setw(9)  << t
-                  << std::setw(20) << static_cast<long>(opt_tput)
-                  << std::setw(18) << static_cast<long>(naive_tput)
-                  << std::setw(13) << opt_scale   << "x"
-                  << std::setw(13) << naive_scale << "x"
+    for (auto wl : workloads) {
+        std::cout << "┌─ " << wlLabel(wl) << "\n";
+        std::cout << "│\n";
+        std::cout << "│  " << std::left
+                  << std::setw(9)  << "Threads"
+                  << std::setw(17) << "Naive (Mops/s)"
+                  << std::setw(17) << "Opt   (Mops/s)"
+                  << std::setw(12) << "Speedup"
                   << "\n";
-    }
+        std::cout << "│  " << std::string(55, '-') << "\n";
 
-    std::cout << "\n── analysis ────────────────────────────────────────────────────────────\n";
-    std::cout << "opt scaling: measures fine-grained locking benefit (per-level spinlocks\n";
-    std::cout << "             allow concurrent access to disjoint price levels).\n";
-    std::cout << "naive scaling: measures single-mutex contention bottleneck.\n";
-    std::cout << "crossover: thread count where optimized first overtakes naive total ops/s.\n";
+        for (int nt : tcs) {
+            auto naive = runBench<NaiveOrderBook>(nt, wl);
+            auto opt   = runBench<OrderBook>(nt, wl);
+            double speedup = opt.mops / naive.mops;
+
+            std::cout << "│  " << std::left << std::setw(9) << nt
+                      << std::fixed << std::setprecision(3)
+                      << std::setw(17) << naive.mops
+                      << std::setw(17) << opt.mops;
+
+            // ANSI color: green if faster, yellow if within 5%, red if slower
+            if (speedup >= 1.05)
+                std::cout << "\033[32m" << speedup << "x\033[0m";
+            else if (speedup >= 0.95)
+                std::cout << "\033[33m" << speedup << "x\033[0m";
+            else
+                std::cout << "\033[31m" << speedup << "x\033[0m";
+            std::cout << "\n";
+        }
+        std::cout << "│\n";
+    }
+    std::cout << "└─ done\n\n";
+    return 0;
 }

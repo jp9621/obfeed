@@ -1,0 +1,2 @@
+/usr/bin/ar qc libob_engine.a CMakeFiles/ob_engine.dir/src/OrderBook.cpp.o CMakeFiles/ob_engine.dir/src/PriceLevel.cpp.o CMakeFiles/ob_engine.dir/src/Order.cpp.o CMakeFiles/ob_engine.dir/src/Simulator.cpp.o
+/usr/bin/ranlib libob_engine.a

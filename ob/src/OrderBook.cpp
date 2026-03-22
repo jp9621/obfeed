@@ -1,20 +1,69 @@
 #include "OrderBook.h"
-#include "PriceLevel.h"
-#include "Trade.h"
 #include "Order.h"
-#include <iostream>
+#include "Trade.h"
 #include <algorithm>
-#include <limits>
 #include <cmath>
-#include <vector>
+#include <limits>
 
-OrderBook::OrderBook() {}
+// ─────────────────────────────────────────────────────────────
+// Construction
+// ─────────────────────────────────────────────────────────────
 
-OrderBook::~OrderBook() {
-    for (auto& pair : _priceMap) {
-        delete pair.second;
-    }
+OrderBook::OrderBook(double basePrice, double tickSize, int numTicks)
+    : _basePrice(basePrice)
+    , _invTickSize(1.0 / tickSize)
+    , _tickSize(tickSize)
+    , _numTicks(numTicks)
+    , _levels(std::make_unique<Level[]>(numTicks))
+    , _bestBidTick(-1)
+    , _bestAskTick(numTicks)
+{}
+
+// ─────────────────────────────────────────────────────────────
+// Price ↔ tick helpers
+// ─────────────────────────────────────────────────────────────
+
+inline int OrderBook::toTick(double price) const noexcept {
+    return static_cast<int>((price - _basePrice) * _invTickSize + 0.5);
 }
+
+inline double OrderBook::toPrice(int tick) const noexcept {
+    return _basePrice + tick * _tickSize;
+}
+
+inline bool OrderBook::validTick(int tick) const noexcept {
+    return tick >= 0 && tick < _numTicks;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Best-price refresh (called after a level empties)
+// Caller holds the emptied level's mutex; we only read atomic
+// quantities on other levels — no other locks taken.
+// ─────────────────────────────────────────────────────────────
+
+void OrderBook::refreshBestBidFrom(int startTick) {
+    for (int t = startTick; t >= 0; --t) {
+        if (_levels[t].bidQty.load(std::memory_order_acquire) > 0) {
+            _bestBidTick.store(t, std::memory_order_release);
+            return;
+        }
+    }
+    _bestBidTick.store(-1, std::memory_order_release);
+}
+
+void OrderBook::refreshBestAskFrom(int startTick) {
+    for (int t = startTick; t < _numTicks; ++t) {
+        if (_levels[t].askQty.load(std::memory_order_acquire) > 0) {
+            _bestAskTick.store(t, std::memory_order_release);
+            return;
+        }
+    }
+    _bestAskTick.store(_numTicks, std::memory_order_release);
+}
+
+// ─────────────────────────────────────────────────────────────
+// insertOrder
+// ─────────────────────────────────────────────────────────────
 
 void OrderBook::insertOrder(const Order& order) {
     if (order.getPrice() == 0.0) {
@@ -22,178 +71,235 @@ void OrderBook::insertOrder(const Order& order) {
         return;
     }
 
-    if (order.getSide() == OrderSide::Sell) {
-        double bestBid = getBestBid();
-        if (bestBid > 0.0 && order.getPrice() <= bestBid) {
-            matchOrder(OrderSide::Sell, order.getPrice(), order.getQuantity(), order.getTimeStamp());
+    int tick = toTick(order.getPrice());
+    if (!validTick(tick)) return;
+
+    const OrderSide side = order.getSide();
+
+    // Check for a crossing order using the atomic best-price — no lock needed.
+    if (side == OrderSide::Sell) {
+        int bb = _bestBidTick.load(std::memory_order_acquire);
+        if (bb >= 0 && tick <= bb) {
+            matchOrder(side, order.getPrice(), order.getQuantity(), order.getTimeStamp());
             return;
         }
     } else {
-        double bestAsk = getBestAsk();
-        if (bestAsk < std::numeric_limits<double>::max() && order.getPrice() >= bestAsk) {
-            matchOrder(OrderSide::Buy, order.getPrice(), order.getQuantity(), order.getTimeStamp());
+        int ba = _bestAskTick.load(std::memory_order_acquire);
+        if (ba < _numTicks && tick >= ba) {
+            matchOrder(side, order.getPrice(), order.getQuantity(), order.getTimeStamp());
             return;
         }
     }
 
-    double price = order.getPrice();
+    // Resting insert: lock only this one level.
+    Level& lvl = _levels[tick];
     {
-        std::unique_lock<std::shared_mutex> lock(_bookmtx);
-        if (_priceMap.find(price) == _priceMap.end()) {
-            PriceLevel *level = new PriceLevel(price);
-            _sortedLevels.emplace(price, level);
-            _priceMap.emplace(price, level);
+        std::lock_guard<std::mutex> lk(lvl.mtx);
+
+        if (side == OrderSide::Buy) {
+            lvl.bids.push_back(order);
+            int prev = lvl.bidQty.fetch_add(order.getQuantity(), std::memory_order_release);
+            if (prev == 0) {
+                // Level just became non-empty — update best bid upward via CAS.
+                int expected = _bestBidTick.load(std::memory_order_relaxed);
+                while (tick > expected &&
+                       !_bestBidTick.compare_exchange_weak(
+                           expected, tick,
+                           std::memory_order_release,
+                           std::memory_order_relaxed)) {}
+            }
+        } else {
+            lvl.asks.push_back(order);
+            int prev = lvl.askQty.fetch_add(order.getQuantity(), std::memory_order_release);
+            if (prev == 0) {
+                // Level just became non-empty — update best ask downward via CAS.
+                int expected = _bestAskTick.load(std::memory_order_relaxed);
+                while (tick < expected &&
+                       !_bestAskTick.compare_exchange_weak(
+                           expected, tick,
+                           std::memory_order_release,
+                           std::memory_order_relaxed)) {}
+            }
         }
     }
-    _priceMap[price]->addOrder(order);
 }
 
+// ─────────────────────────────────────────────────────────────
+// cancelOrder
+// ─────────────────────────────────────────────────────────────
+
 bool OrderBook::cancelOrder(int orderId, double price) {
-    std::unique_lock<std::shared_mutex> lock(_bookmtx);
-    auto it = _priceMap.find(price);
-    if (it != _priceMap.end()) {
-        bool removed = it->second->removeOrder(orderId);
-        if (it->second->isEmpty()) {
-            _sortedLevels.erase(price);
-            _priceMap.erase(price);
-            delete it->second;
+    int tick = toTick(price);
+    if (!validTick(tick)) return false;
+
+    Level& lvl = _levels[tick];
+    std::lock_guard<std::mutex> lk(lvl.mtx);
+
+    for (auto it = lvl.bids.begin(); it != lvl.bids.end(); ++it) {
+        if (it->getId() == orderId) {
+            int qty = it->getQuantity();
+            lvl.bids.erase(it);
+            lvl.bidQty.fetch_sub(qty, std::memory_order_release);
+            if (lvl.bidQty.load(std::memory_order_acquire) == 0 &&
+                tick == _bestBidTick.load(std::memory_order_relaxed)) {
+                refreshBestBidFrom(tick - 1);
+            }
+            return true;
         }
-        return removed;
+    }
+    for (auto it = lvl.asks.begin(); it != lvl.asks.end(); ++it) {
+        if (it->getId() == orderId) {
+            int qty = it->getQuantity();
+            lvl.asks.erase(it);
+            lvl.askQty.fetch_sub(qty, std::memory_order_release);
+            if (lvl.askQty.load(std::memory_order_acquire) == 0 &&
+                tick == _bestAskTick.load(std::memory_order_relaxed)) {
+                refreshBestAskFrom(tick + 1);
+            }
+            return true;
+        }
     }
     return false;
 }
 
-std::vector<Trade> OrderBook::matchOrder(OrderSide side, double price, int quantity, double timestamp) {
+// ─────────────────────────────────────────────────────────────
+// matchOrder
+// ─────────────────────────────────────────────────────────────
+
+std::vector<Trade> OrderBook::matchOrder(OrderSide side, double price,
+                                         int quantity, double timestamp) {
     std::vector<Trade> allTrades;
     int remaining = quantity;
-    std::unique_lock<std::shared_mutex> lock(_bookmtx);
-
-    std::vector<std::pair<double, PriceLevel*>> levelsToMatch;
-    int totalAvailableQty = 0;
 
     if (side == OrderSide::Buy) {
-        auto it = _sortedLevels.begin();
-        while (it != _sortedLevels.end() && totalAvailableQty < quantity) {
-            if (price == 0.0 || it->first <= price) {
-                int levelAskQty = it->second->getAskQuantity();
-                if (levelAskQty > 0) {
-                    levelsToMatch.push_back({it->first, it->second});
-                    totalAvailableQty += levelAskQty;
+        int limitTick = (price == 0.0) ? (_numTicks - 1) : toTick(price);
+        int startTick = _bestAskTick.load(std::memory_order_acquire);
+
+        for (int t = startTick; t <= limitTick && remaining > 0 && t < _numTicks; ++t) {
+            if (_levels[t].askQty.load(std::memory_order_relaxed) == 0) continue;
+
+            Level& lvl = _levels[t];
+            std::lock_guard<std::mutex> lk(lvl.mtx);
+
+            while (!lvl.asks.empty() && remaining > 0) {
+                Order& ask     = lvl.asks.front();
+                int    matched = std::min(remaining, ask.getQuantity());
+                Trade  trade(toPrice(t), matched, OrderSide::Buy, timestamp);
+                updatePosition(trade);
+                allTrades.push_back(trade);
+                remaining -= matched;
+                if (matched == ask.getQuantity()) {
+                    lvl.asks.pop_front();
+                } else {
+                    ask.setQuantity(ask.getQuantity() - matched);
                 }
-            } else {
-                break;
+                lvl.askQty.fetch_sub(matched, std::memory_order_release);
             }
-            ++it;
+            if (lvl.askQty.load(std::memory_order_acquire) == 0 &&
+                t == _bestAskTick.load(std::memory_order_relaxed)) {
+                refreshBestAskFrom(t + 1);
+            }
         }
     } else {
-        auto it = _sortedLevels.rbegin();
-        while (it != _sortedLevels.rend() && totalAvailableQty < quantity) {
-            if (price == 0.0 || it->first >= price) {
-                int levelBidQty = it->second->getBidQuantity();
-                if (levelBidQty > 0) {
-                    levelsToMatch.push_back({it->first, it->second});
-                    totalAvailableQty += levelBidQty;
+        int limitTick = (price == 0.0) ? 0 : toTick(price);
+        int startTick = _bestBidTick.load(std::memory_order_acquire);
+
+        for (int t = startTick; t >= limitTick && remaining > 0 && t >= 0; --t) {
+            if (_levels[t].bidQty.load(std::memory_order_relaxed) == 0) continue;
+
+            Level& lvl = _levels[t];
+            std::lock_guard<std::mutex> lk(lvl.mtx);
+
+            while (!lvl.bids.empty() && remaining > 0) {
+                Order& bid     = lvl.bids.front();
+                int    matched = std::min(remaining, bid.getQuantity());
+                Trade  trade(toPrice(t), matched, OrderSide::Sell, timestamp);
+                updatePosition(trade);
+                allTrades.push_back(trade);
+                remaining -= matched;
+                if (matched == bid.getQuantity()) {
+                    lvl.bids.pop_front();
+                } else {
+                    bid.setQuantity(bid.getQuantity() - matched);
                 }
-            } else {
-                break;
+                lvl.bidQty.fetch_sub(matched, std::memory_order_release);
             }
-            ++it;
+            if (lvl.bidQty.load(std::memory_order_acquire) == 0 &&
+                t == _bestBidTick.load(std::memory_order_relaxed)) {
+                refreshBestBidFrom(t - 1);
+            }
         }
     }
 
-    for (auto& [levelPrice, level] : levelsToMatch) {
-        if (remaining <= 0) break;
-
-        auto trades = level->processMatching(remaining, timestamp, side);
-        for (const auto& trade : trades) {
-            this->updatePosition(trade);
-        }
-        allTrades.insert(allTrades.end(), trades.begin(), trades.end());
-        
-        for (const auto& trade : trades) {
-            remaining -= trade.quantity;
-        }
-
-        if (level->isEmpty()) {
-            _sortedLevels.erase(levelPrice);
-            _priceMap.erase(levelPrice);
-            delete level;
-        }
-    }
-
+    // Place any unmatched remainder as a resting limit order.
     if (remaining > 0 && price > 0.0) {
-        Order remainingOrder(timestamp, price, remaining, side, timestamp);
-        insertOrder(remainingOrder);
+        Order remainder(static_cast<int>(timestamp), price, remaining, side, timestamp);
+        insertOrder(remainder);
     }
 
     return allTrades;
 }
 
+// ─────────────────────────────────────────────────────────────
+// Position & P&L
+// ─────────────────────────────────────────────────────────────
+
 void OrderBook::updatePosition(const Trade& trade) {
+    std::lock_guard<std::mutex> lk(_posMtx);
+
     int positionDelta = trade.side == OrderSide::Buy ? trade.quantity : -trade.quantity;
-    
+
     if ((_position > 0 && positionDelta < 0) || (_position < 0 && positionDelta > 0)) {
         double avgPrice = _totalCost / std::abs(_position);
         if (_position > 0) {
-            _realizedPnL += (trade.price - avgPrice) * std::min(std::abs(positionDelta), std::abs(_position));
+            _realizedPnL += (trade.price - avgPrice) *
+                            std::min(std::abs(positionDelta), std::abs(_position));
         } else {
-            _realizedPnL += (avgPrice - trade.price) * std::min(std::abs(positionDelta), std::abs(_position));
+            _realizedPnL += (avgPrice - trade.price) *
+                            std::min(std::abs(positionDelta), std::abs(_position));
         }
     }
-    
-    _position += positionDelta;
-    _totalCost += positionDelta * trade.price;
-    
-    if ((_position > 0 && _position - positionDelta < 0) || 
+
+    _position   += positionDelta;
+    _totalCost  += positionDelta * trade.price;
+
+    if ((_position > 0 && _position - positionDelta < 0) ||
         (_position < 0 && _position - positionDelta > 0)) {
         _totalCost = _position * trade.price;
     }
 }
 
 double OrderBook::getUnrealizedPnL(double currentPrice) const {
+    std::lock_guard<std::mutex> lk(_posMtx);
     if (_position == 0) return 0.0;
-    
     double avgPrice = _totalCost / std::abs(_position);
-    if (_position > 0) {
-        return (currentPrice - avgPrice) * _position;
-    } else {
-        return (avgPrice - currentPrice) * std::abs(_position);
-    }
+    return _position > 0
+        ? (currentPrice - avgPrice) * _position
+        : (avgPrice - currentPrice) * std::abs(_position);
 }
 
+// ─────────────────────────────────────────────────────────────
+// Best bid / ask  —  pure atomic loads, no lock
+// ─────────────────────────────────────────────────────────────
+
 double OrderBook::getBestBid() const {
-    std::shared_lock<std::shared_mutex> lock(_bookmtx);
-    auto it = _sortedLevels.rbegin();
-    while (it != _sortedLevels.rend()) {
-        if (it->second->getBidQuantity() > 0) {
-            return it->first;
-        }
-        ++it;
-    }
-    return 0.0;
+    int tick = _bestBidTick.load(std::memory_order_acquire);
+    return tick >= 0 ? toPrice(tick) : 0.0;
 }
 
 double OrderBook::getBestAsk() const {
-    std::shared_lock<std::shared_mutex> lock(_bookmtx);
-    auto it = _sortedLevels.begin();
-    while (it != _sortedLevels.end()) {
-        if (it->second->getAskQuantity() > 0) {
-            return it->first;
-        }
-        ++it;
-    }
-    return std::numeric_limits<double>::max();
+    int tick = _bestAskTick.load(std::memory_order_acquire);
+    return tick < _numTicks ? toPrice(tick) : std::numeric_limits<double>::max();
 }
 
-PriceLevel* OrderBook::getPriceLevel(double price) {
-    std::shared_lock<std::shared_mutex> lock(_bookmtx);
-    auto it = _priceMap.find(price);
-    if (it != _priceMap.end()) {
-        return it->second;
-    }
+// ─────────────────────────────────────────────────────────────
+// Legacy stubs
+// ─────────────────────────────────────────────────────────────
+
+PriceLevel* OrderBook::getPriceLevel(double /*price*/) {
     return nullptr;
 }
 
 std::map<double, PriceLevel*>& OrderBook::getSortedLevels() {
-    return _sortedLevels;
+    return _legacyMap;
 }

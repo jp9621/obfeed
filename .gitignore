@@ -2,3 +2,5 @@ optimizations.txt
 ob/build/*
 ob/.cache/*
 ob/build_debug/*
+temp.txt
+

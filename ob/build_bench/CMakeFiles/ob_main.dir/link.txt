@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/ob_main.dir/link.d CMakeFiles/ob_main.dir/main.cpp.o -o ob_main  libob_engine.a
