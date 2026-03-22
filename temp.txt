@@ -1,3 +1,0 @@
-- C++ order book engine built with a hashtable of price levels, custom memory pool for fast order allocations, spinlock order matching with ring buffer order queues
-- synthetic market data generator using jump-diffusion price process and Black-Scholes option chains with full greeks (delta, gamma, vega, theta); EWMA volatility estimation updated incrementally each tick;
-
