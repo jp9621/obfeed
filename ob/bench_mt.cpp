@@ -1,5 +1,6 @@
 #include "OrderBook.h"
 #include "Order.h"
+#include "Simulator.h"
 
 #include <map>
 #include <deque>
@@ -201,6 +202,39 @@ Result runBench(int nThreads) {
     return { total / elapsed / 1e6 };
 }
 
+// ============================================================
+// Option chain benchmark (single-threaded — mirrors real usage
+// where one simulator thread drives build_chain on each tick)
+// ============================================================
+static double benchChain() {
+    OptionChainConfig cfg;          // default: 9 expiries × 21 strikes = 378 quotes
+    std::mt19937_64   rng(42);
+    OptionChainGenerator gen(cfg, rng);
+
+    // Bootstrap EWMA vol estimator (needs min_history_samples = 10)
+    double price = 100.0;
+    for (int i = 0; i < 15; ++i)
+        gen.update_vol(price * (1.0 + 0.001 * (i - 7)), 1.0);
+
+    std::atomic<bool> stop{false};
+    uint64_t count = 0;
+
+    auto t0 = std::chrono::steady_clock::now();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // warmup
+
+    count = 0;
+    t0 = std::chrono::steady_clock::now();
+    auto deadline = t0 + std::chrono::milliseconds(BENCH_MS);
+    while (std::chrono::steady_clock::now() < deadline) {
+        (void)gen.build_chain(price, 1.0e9);
+        ++count;
+    }
+    double elapsed = std::chrono::duration<double>(
+        std::chrono::steady_clock::now() - t0).count();
+    (void)stop;
+    return count / elapsed;  // chains/sec
+}
+
 int main() {
     unsigned hw = std::thread::hardware_concurrency();
     std::vector<int> tcs = {1, 2, 4, 8};
@@ -243,5 +277,18 @@ int main() {
         std::cout << "\n";
     }
     std::cout << "\n";
+
+    // ── Option chain benchmark ───────────────────────────────
+    std::cout << "╔══════════════════════════════════════════════════════╗\n";
+    std::cout << "║       Option Chain Benchmark (single-threaded)       ║\n";
+    std::cout << "╚══════════════════════════════════════════════════════╝\n";
+    std::cout << "  Chain size : 9 expiries × 21 strikes × 2 sides = 378 quotes\n";
+    std::cout << "  Duration   : " << BENCH_MS << " ms\n\n";
+
+    double cps = benchChain();
+    std::cout << std::fixed << std::setprecision(1);
+    std::cout << "  build_chain throughput: " << cps << " chains/sec"
+              << "  (" << std::setprecision(3) << (cps * 378 / 1e6) << " Mquotes/sec)\n\n";
+
     return 0;
 }

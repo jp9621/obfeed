@@ -26,12 +26,28 @@ MarketSimConfig::MarketSimConfig() {
 // Helpers
 // ---------------------------------------------------------------------------
 
+// Abramowitz & Stegun 26.2.17 — max error 7.5e-8.
+// Replaces std::erf (expensive libm call) with a polynomial approximation.
 static double std_normal_cdf(double x) {
-    return 0.5 * (1.0 + std::erf(x / std::sqrt(2.0)));
+    static constexpr double p  = 0.2316419;
+    static constexpr double a1 =  0.319381530;
+    static constexpr double a2 = -0.356563782;
+    static constexpr double a3 =  1.781477937;
+    static constexpr double a4 = -1.821255978;
+    static constexpr double a5 =  1.330274429;
+    static constexpr double INV_SQRT2PI = 0.3989422804014327;
+    bool   neg = (x < 0.0);
+    double ax  = neg ? -x : x;
+    double t   = 1.0 / (1.0 + p * ax);
+    double poly = t * (a1 + t * (a2 + t * (a3 + t * (a4 + t * a5))));
+    double pdf  = INV_SQRT2PI * std::exp(-0.5 * ax * ax);
+    double cdf  = 1.0 - pdf * poly;
+    return neg ? 1.0 - cdf : cdf;
 }
 
 static double std_normal_pdf(double x) {
-    return std::exp(-0.5 * x * x) / std::sqrt(2.0 * M_PI);
+    static constexpr double INV_SQRT2PI = 0.3989422804014327;
+    return INV_SQRT2PI * std::exp(-0.5 * x * x);
 }
 
 // ---------------------------------------------------------------------------
@@ -169,49 +185,91 @@ std::vector<OptionQuote> OptionChainGenerator::build_chain(double spot, double t
     double base_vol = *vol_opt;
 
     std::vector<OptionQuote> chain;
-    const double secs_per_day = 86400.0;
+    chain.reserve(_cfg.expiries_days.size() * _cfg.moneyness.size() * 2);
+    const double secs_per_day  = 86400.0;
+    static constexpr double INV_SQRT2PI = 0.3989422804014327;
+    const double r = _cfg.risk_free_rate;
+    const double q = _cfg.dividend_yield;
 
     std::normal_distribution<double> noise_dist(0.0, _cfg.vol_noise_std);
 
     for (double days : _cfg.expiries_days) {
         days = std::max(days, 1e-6);
-        double ttm_years = days / 365.25;
+        double ttm       = days / 365.25;
         double expiry_ts = ts + days * secs_per_day;
+
+        // Per-expiry constants — computed once, shared across all strikes.
+        double sqrt_t    = std::sqrt(ttm);
+        double disc_r    = std::exp(-r * ttm);
+        double disc_q    = std::exp(-q * ttm);
+        double pivot     = std::max(_cfg.term_structure_pivot_days, 1e-6);
+        double term_scale = std::max(1.0 + _cfg.term_structure_slope * (days - pivot) / pivot, 0.1);
 
         for (double m : _cfg.moneyness) {
             double strike = std::max(spot * (1.0 + m), 1e-6);
 
-            // Term structure
-            double pivot      = std::max(_cfg.term_structure_pivot_days, 1e-6);
-            double rel        = (days - pivot) / pivot;
-            double term_scale = std::max(1.0 + _cfg.term_structure_slope * rel, 0.1);
-            double lv         = base_vol * term_scale;
-
-            // Smile
-            double k       = (spot > 0.0 && strike > 0.0) ? std::log(strike / spot) : 0.0;
+            // Log-moneyness for smile (same sign convention as original k)
+            double lk = (spot > 0.0 && strike > 0.0) ? std::log(strike / spot) : 0.0;
             double smile_f = std::clamp(
-                1.0 + _cfg.smile_slope * k + _cfg.smile_convexity * k * k, 0.2, 5.0);
-            lv *= smile_f;
-
-            // Vol noise
-            if (_cfg.vol_noise_std > 0.0)
-                lv += noise_dist(_rng);
-
+                1.0 + _cfg.smile_slope * lk + _cfg.smile_convexity * lk * lk, 0.2, 5.0);
+            double lv = base_vol * term_scale * smile_f;
+            if (_cfg.vol_noise_std > 0.0) lv += noise_dist(_rng);
             lv = std::clamp(lv, _cfg.min_vol, _cfg.max_vol);
 
-            for (bool is_call : {true, false}) {
-                BSGreeks g = black_scholes_greeks(spot, strike,
-                                                  _cfg.risk_free_rate,
-                                                  _cfg.dividend_yield,
-                                                  lv, ttm_years, is_call);
-                chain.push_back({ts, expiry_ts, ttm_years, spot, strike,
-                                 is_call, g.price, lv,
-                                 g.delta, g.gamma, g.vega, g.theta});
+            // Compute Black-Scholes quantities ONCE for both call and put.
+            double call_price, call_delta, call_theta;
+            double put_price,  put_delta,  put_theta;
+            double gamma, vega;
 
-                if (_cfg.max_chain_points > 0 &&
-                    static_cast<int>(chain.size()) >= _cfg.max_chain_points)
-                    return chain;
+            if (ttm <= 0.0 || lv < 1e-12) {
+                call_price  = std::max(spot - strike, 0.0);
+                put_price   = std::max(strike - spot, 0.0);
+                call_delta  = (spot > strike) ? 1.0 : 0.0;
+                put_delta   = (spot < strike) ? -1.0 : 0.0;
+                call_theta  = put_theta = gamma = vega = 0.0;
+            } else {
+                double sigma_sqrt_t = lv * sqrt_t;
+                double d1 = (std::log(spot / strike)
+                             + (r - q + 0.5 * lv * lv) * ttm) / sigma_sqrt_t;
+                double d2 = d1 - sigma_sqrt_t;
+
+                // CDF and PDF — share exp(-0.5*d1^2) between cdf(d1) and pdf(d1).
+                double Nd1 = std_normal_cdf(d1);
+                double Nd2 = std_normal_cdf(d2);
+                double phi  = INV_SQRT2PI * std::exp(-0.5 * d1 * d1);  // pdf(d1)
+
+                double dq_s  = disc_q * spot;
+                double dr_k  = disc_r * strike;
+
+                // Call
+                call_price = dq_s * Nd1 - dr_k * Nd2;
+                call_delta = disc_q * Nd1;
+                call_theta = -dq_s * phi * lv / (2.0 * sqrt_t)
+                             - r * dr_k * Nd2
+                             + q * dq_s * Nd1;
+
+                // Put — use 1−Nd symmetry; no extra cdf/exp calls.
+                double Nd1n = 1.0 - Nd1;
+                double Nd2n = 1.0 - Nd2;
+                put_price  = dr_k * Nd2n - dq_s * Nd1n;
+                put_delta  = disc_q * (Nd1 - 1.0);
+                put_theta  = -dq_s * phi * lv / (2.0 * sqrt_t)
+                             + r * dr_k * Nd2n
+                             - q * dq_s * Nd1n;
+
+                // Shared Greeks
+                gamma = disc_q * phi / (spot * sigma_sqrt_t);
+                vega  = dq_s * phi * sqrt_t;
             }
+
+            chain.push_back({ts, expiry_ts, ttm, spot, strike, true,
+                             call_price, lv, call_delta, gamma, vega, call_theta});
+            chain.push_back({ts, expiry_ts, ttm, spot, strike, false,
+                             put_price,  lv, put_delta,  gamma, vega, put_theta});
+
+            if (_cfg.max_chain_points > 0 &&
+                static_cast<int>(chain.size()) >= _cfg.max_chain_points)
+                return chain;
         }
     }
     return chain;
