@@ -15,9 +15,6 @@
 #include <limits>
 #include <algorithm>
 
-// ============================================================
-// NaiveOrderBook
-// ============================================================
 class NaiveOrderBook {
 public:
     void insertOrder(const Order& order) {
@@ -80,18 +77,6 @@ private:
     std::mutex _mtx;
 };
 
-// ============================================================
-// Workload
-//
-// Realistic market-maker workload where depth stays bounded:
-//   30% passive limit insert  (non-crossing, adds to book)
-//   30% cancel                (cancels a recently-inserted order)
-//   40% getBestBid/Ask        (top-of-book read)
-//
-// Because insert ≈ cancel, at steady state the depth per level
-// stabilises around the cancel-ring size (~256).  This is the
-// bounded-depth regime where a ring buffer is supposed to win.
-// ============================================================
 static constexpr int    BENCH_MS  = 3000;
 static constexpr int    N_LEVELS  = 20;
 static constexpr double BID_BASE  = 90.0;
@@ -161,14 +146,12 @@ Result runBench(int nThreads) {
             int roll = pct(rng);
 
             if (roll < 30) {
-                // Passive limit insert
                 const auto& tmpl = pool.e[poolIdx++ & (Pool::SZ - 1)];
                 int id = idBase + (orderCtr++ & ((1 << 20) - 1));
                 Order o(id, tmpl.price, tmpl.qty, tmpl.side, 0.0);
                 book.insertOrder(o);
                 ring[ringHead++ & (RING - 1)] = {id, tmpl.price};
             } else if (roll < 60) {
-                // Cancel a recently inserted order
                 int slot = rng() & (RING - 1);
                 auto [oid, oprice] = ring[slot];
                 if (oid >= 0) {
@@ -176,7 +159,6 @@ Result runBench(int nThreads) {
                     ring[slot] = {-1, 0.0};
                 }
             } else {
-                // Top-of-book read
                 if (roll & 1) (void)book.getBestBid();
                 else          (void)book.getBestAsk();
             }
@@ -202,16 +184,11 @@ Result runBench(int nThreads) {
     return { total / elapsed / 1e6 };
 }
 
-// ============================================================
-// Option chain benchmark (single-threaded — mirrors real usage
-// where one simulator thread drives build_chain on each tick)
-// ============================================================
 static double benchChain() {
-    OptionChainConfig cfg;          // default: 9 expiries × 21 strikes = 378 quotes
+    OptionChainConfig cfg;
     std::mt19937_64   rng(42);
     OptionChainGenerator gen(cfg, rng);
 
-    // Bootstrap EWMA vol estimator (needs min_history_samples = 10)
     double price = 100.0;
     for (int i = 0; i < 15; ++i)
         gen.update_vol(price * (1.0 + 0.001 * (i - 7)), 1.0);
@@ -220,7 +197,7 @@ static double benchChain() {
     uint64_t count = 0;
 
     auto t0 = std::chrono::steady_clock::now();
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // warmup
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     count = 0;
     t0 = std::chrono::steady_clock::now();
@@ -232,7 +209,7 @@ static double benchChain() {
     double elapsed = std::chrono::duration<double>(
         std::chrono::steady_clock::now() - t0).count();
     (void)stop;
-    return count / elapsed;  // chains/sec
+    return count / elapsed;
 }
 
 int main() {
@@ -242,9 +219,7 @@ int main() {
         tcs.push_back((int)hw);
 
     std::cout << "\n";
-    std::cout << "╔══════════════════════════════════════════════════════╗\n";
-    std::cout << "║       Order Book Multithreaded Benchmark             ║\n";
-    std::cout << "╚══════════════════════════════════════════════════════╝\n";
+    std::cout << "Order Book Benchmark (multithreaded)";
     std::cout << "  Duration  : " << BENCH_MS << " ms per run\n";
     std::cout << "  Threads   : up to " << hw << "\n";
     std::cout << "  Workload  : 30% insert  |  30% cancel  |  40% read\n";
@@ -278,10 +253,8 @@ int main() {
     }
     std::cout << "\n";
 
-    // ── Option chain benchmark ───────────────────────────────
-    std::cout << "╔══════════════════════════════════════════════════════╗\n";
-    std::cout << "║       Option Chain Benchmark (single-threaded)       ║\n";
-    std::cout << "╚══════════════════════════════════════════════════════╝\n";
+    
+    std::cout << "Option Chain Benchmark (single-threaded)";
     std::cout << "  Chain size : 9 expiries × 21 strikes × 2 sides = 378 quotes\n";
     std::cout << "  Duration   : " << BENCH_MS << " ms\n\n";
 

@@ -4,14 +4,10 @@
 
 static constexpr double SECONDS_PER_YEAR = 365.25 * 24.0 * 60.0 * 60.0;
 
-// ---------------------------------------------------------------------------
-// SimConfig constructors
-// ---------------------------------------------------------------------------
 
 OptionChainConfig::OptionChainConfig()
     : expiries_days{7, 14, 21, 30, 45, 60, 75, 90, 120}
 {
-    // linspace(-0.5, 0.5, 21)
     const int n = 21;
     moneyness.resize(n);
     for (int i = 0; i < n; ++i)
@@ -22,12 +18,7 @@ MarketSimConfig::MarketSimConfig() {
     option_chain.price_noise_std = 0.02;
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
-// Abramowitz & Stegun 26.2.17 — max error 7.5e-8.
-// Replaces std::erf (expensive libm call) with a polynomial approximation.
 static double std_normal_cdf(double x) {
     static constexpr double p  = 0.2316419;
     static constexpr double a1 =  0.319381530;
@@ -50,9 +41,6 @@ static double std_normal_pdf(double x) {
     return INV_SQRT2PI * std::exp(-0.5 * x * x);
 }
 
-// ---------------------------------------------------------------------------
-// Black-Scholes
-// ---------------------------------------------------------------------------
 
 BSGreeks black_scholes_greeks(double spot, double strike, double rate,
                                double dividend, double vol, double ttm,
@@ -108,9 +96,6 @@ BSGreeks black_scholes_greeks(double spot, double strike, double rate,
     return {price, delta, gamma, vega, theta, vol};
 }
 
-// ---------------------------------------------------------------------------
-// JumpDiffusion
-// ---------------------------------------------------------------------------
 
 JumpDiffusion::JumpDiffusion(const MarketSimConfig& cfg, std::mt19937_64& rng)
     : _cfg(cfg), _rng(rng) {}
@@ -136,9 +121,6 @@ double JumpDiffusion::step(double spot) {
     return spot * std::exp(drift + diffusion + jump_term);
 }
 
-// ---------------------------------------------------------------------------
-// OptionChainGenerator
-// ---------------------------------------------------------------------------
 
 OptionChainGenerator::OptionChainGenerator(const OptionChainConfig& cfg,
                                             std::mt19937_64& rng)
@@ -198,7 +180,6 @@ std::vector<OptionQuote> OptionChainGenerator::build_chain(double spot, double t
         double ttm       = days / 365.25;
         double expiry_ts = ts + days * secs_per_day;
 
-        // Per-expiry constants — computed once, shared across all strikes.
         double sqrt_t    = std::sqrt(ttm);
         double disc_r    = std::exp(-r * ttm);
         double disc_q    = std::exp(-q * ttm);
@@ -208,7 +189,6 @@ std::vector<OptionQuote> OptionChainGenerator::build_chain(double spot, double t
         for (double m : _cfg.moneyness) {
             double strike = std::max(spot * (1.0 + m), 1e-6);
 
-            // Log-moneyness for smile (same sign convention as original k)
             double lk = (spot > 0.0 && strike > 0.0) ? std::log(strike / spot) : 0.0;
             double smile_f = std::clamp(
                 1.0 + _cfg.smile_slope * lk + _cfg.smile_convexity * lk * lk, 0.2, 5.0);
@@ -216,7 +196,6 @@ std::vector<OptionQuote> OptionChainGenerator::build_chain(double spot, double t
             if (_cfg.vol_noise_std > 0.0) lv += noise_dist(_rng);
             lv = std::clamp(lv, _cfg.min_vol, _cfg.max_vol);
 
-            // Compute Black-Scholes quantities ONCE for both call and put.
             double call_price, call_delta, call_theta;
             double put_price,  put_delta,  put_theta;
             double gamma, vega;
@@ -233,22 +212,19 @@ std::vector<OptionQuote> OptionChainGenerator::build_chain(double spot, double t
                              + (r - q + 0.5 * lv * lv) * ttm) / sigma_sqrt_t;
                 double d2 = d1 - sigma_sqrt_t;
 
-                // CDF and PDF — share exp(-0.5*d1^2) between cdf(d1) and pdf(d1).
                 double Nd1 = std_normal_cdf(d1);
                 double Nd2 = std_normal_cdf(d2);
-                double phi  = INV_SQRT2PI * std::exp(-0.5 * d1 * d1);  // pdf(d1)
+                double phi  = INV_SQRT2PI * std::exp(-0.5 * d1 * d1);
 
                 double dq_s  = disc_q * spot;
                 double dr_k  = disc_r * strike;
 
-                // Call
                 call_price = dq_s * Nd1 - dr_k * Nd2;
                 call_delta = disc_q * Nd1;
                 call_theta = -dq_s * phi * lv / (2.0 * sqrt_t)
                              - r * dr_k * Nd2
                              + q * dq_s * Nd1;
 
-                // Put — use 1−Nd symmetry; no extra cdf/exp calls.
                 double Nd1n = 1.0 - Nd1;
                 double Nd2n = 1.0 - Nd2;
                 put_price  = dr_k * Nd2n - dq_s * Nd1n;
@@ -257,7 +233,6 @@ std::vector<OptionQuote> OptionChainGenerator::build_chain(double spot, double t
                              + r * dr_k * Nd2n
                              - q * dq_s * Nd1n;
 
-                // Shared Greeks
                 gamma = disc_q * phi / (spot * sigma_sqrt_t);
                 vega  = dq_s * phi * sqrt_t;
             }
@@ -275,9 +250,6 @@ std::vector<OptionQuote> OptionChainGenerator::build_chain(double spot, double t
     return chain;
 }
 
-// ---------------------------------------------------------------------------
-// MarketSimulator
-// ---------------------------------------------------------------------------
 
 MarketSimulator::MarketSimulator(double initial_price, MarketSimConfig cfg,
                                   std::optional<uint64_t> seed)

@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/jp/dev/obfeed/ob/build_bench/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

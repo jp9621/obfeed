@@ -1,6 +1,7 @@
 optimizations.txt
-ob/build/*
-ob/.cache/*
-ob/build_debug/*
+ob/build/
+ob/build_bench/
+ob/build_debug/
+ob/.cache/
 temp.txt
 

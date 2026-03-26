@@ -5,9 +5,6 @@
 #include <cmath>
 #include <limits>
 
-// ─────────────────────────────────────────────────────────────
-// Construction
-// ─────────────────────────────────────────────────────────────
 
 OrderBook::OrderBook(double basePrice, double tickSize, int numTicks)
     : _basePrice(basePrice)
@@ -19,9 +16,6 @@ OrderBook::OrderBook(double basePrice, double tickSize, int numTicks)
     , _bestAskTick(numTicks)
 {}
 
-// ─────────────────────────────────────────────────────────────
-// Price ↔ tick helpers
-// ─────────────────────────────────────────────────────────────
 
 inline int OrderBook::toTick(double price) const noexcept {
     return static_cast<int>((price - _basePrice) * _invTickSize + 0.5);
@@ -35,11 +29,6 @@ inline bool OrderBook::validTick(int tick) const noexcept {
     return tick >= 0 && tick < _numTicks;
 }
 
-// ─────────────────────────────────────────────────────────────
-// Best-price refresh (called after a level empties)
-// Caller holds the emptied level's mutex; we only read atomic
-// quantities on other levels — no other locks taken.
-// ─────────────────────────────────────────────────────────────
 
 void OrderBook::refreshBestBidFrom(int startTick) {
     for (int t = startTick; t >= 0; --t) {
@@ -61,9 +50,6 @@ void OrderBook::refreshBestAskFrom(int startTick) {
     _bestAskTick.store(_numTicks, std::memory_order_release);
 }
 
-// ─────────────────────────────────────────────────────────────
-// insertOrder
-// ─────────────────────────────────────────────────────────────
 
 void OrderBook::insertOrder(const Order& order) {
     if (order.getPrice() == 0.0) {
@@ -76,7 +62,6 @@ void OrderBook::insertOrder(const Order& order) {
 
     const OrderSide side = order.getSide();
 
-    // Check for a crossing order using the atomic best-price — no lock needed.
     if (side == OrderSide::Sell) {
         int bb = _bestBidTick.load(std::memory_order_acquire);
         if (bb >= 0 && tick <= bb) {
@@ -91,7 +76,6 @@ void OrderBook::insertOrder(const Order& order) {
         }
     }
 
-    // Resting insert: lock only this one level.
     Level& lvl = _levels[tick];
     {
         std::lock_guard<std::mutex> lk(lvl.mtx);
@@ -122,9 +106,6 @@ void OrderBook::insertOrder(const Order& order) {
     }
 }
 
-// ─────────────────────────────────────────────────────────────
-// cancelOrder
-// ─────────────────────────────────────────────────────────────
 
 bool OrderBook::cancelOrder(int orderId, double price) {
     int tick = toTick(price);
@@ -152,9 +133,6 @@ bool OrderBook::cancelOrder(int orderId, double price) {
     return false;
 }
 
-// ─────────────────────────────────────────────────────────────
-// matchOrder
-// ─────────────────────────────────────────────────────────────
 
 std::vector<Trade> OrderBook::matchOrder(OrderSide side, double price,
                                          int quantity, double timestamp) {
@@ -223,7 +201,6 @@ std::vector<Trade> OrderBook::matchOrder(OrderSide side, double price,
         }
     }
 
-    // Place any unmatched remainder as a resting limit order.
     if (remaining > 0 && price > 0.0) {
         Order remainder(static_cast<int>(timestamp), price, remaining, side, timestamp);
         insertOrder(remainder);
@@ -232,9 +209,6 @@ std::vector<Trade> OrderBook::matchOrder(OrderSide side, double price,
     return allTrades;
 }
 
-// ─────────────────────────────────────────────────────────────
-// Position & P&L
-// ─────────────────────────────────────────────────────────────
 
 void OrderBook::updatePosition(const Trade& trade) {
     std::lock_guard<std::mutex> lk(_posMtx);
@@ -270,9 +244,6 @@ double OrderBook::getUnrealizedPnL(double currentPrice) const {
         : (avgPrice - currentPrice) * std::abs(_position);
 }
 
-// ─────────────────────────────────────────────────────────────
-// Best bid / ask  —  pure atomic loads, no lock
-// ─────────────────────────────────────────────────────────────
 
 double OrderBook::getBestBid() const {
     int tick = _bestBidTick.load(std::memory_order_acquire);
@@ -284,11 +255,8 @@ double OrderBook::getBestAsk() const {
     return tick < _numTicks ? toPrice(tick) : std::numeric_limits<double>::max();
 }
 
-// ─────────────────────────────────────────────────────────────
-// Legacy stubs
-// ─────────────────────────────────────────────────────────────
 
-PriceLevel* OrderBook::getPriceLevel(double /*price*/) {
+PriceLevel* OrderBook::getPriceLevel(double) {
     return nullptr;
 }
 

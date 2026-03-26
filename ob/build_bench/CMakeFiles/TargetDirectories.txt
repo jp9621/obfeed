@@ -1,5 +1,0 @@
-/home/jp/dev/obfeed/ob/build_bench/CMakeFiles/ob_engine.dir
-/home/jp/dev/obfeed/ob/build_bench/CMakeFiles/ob_main.dir
-/home/jp/dev/obfeed/ob/build_bench/CMakeFiles/bench_mt.dir
-/home/jp/dev/obfeed/ob/build_bench/CMakeFiles/edit_cache.dir
-/home/jp/dev/obfeed/ob/build_bench/CMakeFiles/rebuild_cache.dir

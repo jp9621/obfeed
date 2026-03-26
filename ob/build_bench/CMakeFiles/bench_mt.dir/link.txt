@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/bench_mt.dir/link.d CMakeFiles/bench_mt.dir/bench_mt.cpp.o -o bench_mt  libob_engine.a
